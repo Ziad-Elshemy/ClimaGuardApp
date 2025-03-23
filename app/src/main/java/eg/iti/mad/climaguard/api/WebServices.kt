@@ -12,6 +12,7 @@ interface WebServices {
     suspend fun getWeather(
         @Query("lat") lat: Double,
         @Query("lon") lon: Double,
-        @Query("appid") apiKey: String = Constants.API_KEY
+        @Query("appid") apiKey: String = Constants.API_KEY,
+        @Query("units") units: String = "metric"
     ): CurrentResponse
 }

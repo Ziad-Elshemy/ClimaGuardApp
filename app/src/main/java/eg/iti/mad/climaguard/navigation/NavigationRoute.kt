@@ -53,7 +53,8 @@ fun BottomNavigationBar(navController: NavController) {
                     }
                 },
                 icon = { Icon(imageVector = item.icon, contentDescription = item.title) },
-                label = { Text(item.title, color = if (index == selectedNavigationIndex) Color.Black else Color.Gray) },
+                label = {
+                    if (index == selectedNavigationIndex) {Text(item.title, color = if (index == selectedNavigationIndex) Color.Black else Color.Gray)} },
                 colors = NavigationBarItemDefaults.colors(
                     selectedIconColor = MaterialTheme.colorScheme.surface,
                     indicatorColor = MaterialTheme.colorScheme.primary
