@@ -65,7 +65,18 @@ class MainActivity : ComponentActivity() {
                                 )
                             }
                             composable(route = NavigationRoute.Profile.route) {
-                                ProfileScreen()
+                                ProfileScreen(
+                                    ViewModelProvider(
+                                        this@MainActivity,
+                                        factory = HomeFactory(
+                                            RepositoryImpl.getInstance(
+                                                WeatherRemoteDataSourceImpl(
+                                                    ApiManager.getApis()
+                                                )
+                                            )
+                                        )
+                                    ).get(HomeViewModel::class.java)
+                                )
                             }
                         }
                     NavHost(
