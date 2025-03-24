@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -34,8 +35,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.draw.clip
@@ -45,134 +48,246 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.skydoves.landscapist.glide.GlideImage
 import eg.iti.mad.climaguard.R
+import eg.iti.mad.climaguard.model.Response
+import eg.iti.mad.climaguard.utils.Utility
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import kotlin.math.sin
 
 @Composable
-    fun HomeScreen(viewModel: HomeViewModel){
-        viewModel.getCurrentWeather()
-    val currentWeatherState = viewModel.currentResponse.observeAsState()
-    Column(
-        modifier = Modifier
-            .verticalScroll(rememberScrollState())
-            .fillMaxSize()
-            .background(Color(0xFF507D83))
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
+fun HomeScreen(viewModel: HomeViewModel) {
+    viewModel.getCurrentWeather()
+//    val currentWeatherState = viewModel.currentResponse.observeAsState()
+    val uiState by viewModel.currentResponse.collectAsStateWithLifecycle()
 
-        // Current temperature
-        Log.d("HomeScreen", "HomeScreen: ${currentWeatherState.value?.main?.humidity}")
-
-        Text("${currentWeatherState.value?.name}", color = Color.White, fontSize = 20.sp)
-
-        //2nd header row
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Column(
-                horizontalAlignment = Alignment.Start
-            ) {
-                Text(text = "${currentWeatherState.value?.weather?.get(0)?.description}", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Color.White)
-                Text(text = "${currentWeatherState.value?.name}", fontSize = 14.sp, color = Color.DarkGray)
-            }
-
-            Image(
-                painter = painterResource(id = R.drawable.header),
-                contentDescription = null,
-                modifier = Modifier.size(50.dp)
-            )
-
-            Column(
-                horizontalAlignment = Alignment.End
-            ) {
-                val dateFormat = SimpleDateFormat("EEE, dd MMM", Locale.getDefault())
-                val formattedDate = dateFormat.format(Date(
-                    currentWeatherState.value?.dt?.times(1000L) ?: 0
-                ))
-                Text(text = "Date", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Color.White)
-                Text(text = "${formattedDate}", fontSize = 14.sp, color = Color.DarkGray)
-            }
+    when (uiState) {
+        is Response.Loading -> {
+            LoadingIndicator()
         }
 
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text("${currentWeatherState.value?.main?.temp?:0}", color = Color.White, fontSize = 60.sp, fontWeight = FontWeight.Bold)
-            Text(text = "°C", color = Color.White, fontSize = 20.sp, modifier = Modifier.size(60.dp)
-                .padding(bottom = 20.dp))
-        }
-        Text("Feels like ${currentWeatherState.value?.main?.feelsLike?:0}°", color = Color.DarkGray, fontSize = 16.sp)
-        Text("High ${currentWeatherState.value?.main?.tempMax?:0}° • Low ${currentWeatherState.value?.main?.tempMin?:0}°", color = Color.DarkGray, fontSize = 16.sp)
-        Spacer(modifier = Modifier.height(16.dp))
+        is Response.Success -> {
+            val responseData = (uiState as Response.Success).data
+            Column(
+                modifier = Modifier
+                    .verticalScroll(rememberScrollState())
+                    .fillMaxSize()
+                    .background(
+                        if (!Utility.isDayTime(responseData.dt?.toLong()?:0L))
+                        Color(0xFF2F4042) else Color(0xFF95CBD2)
+                    )
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
 
-        // Next hour forecast
-        ForecastCard("Hourly forecast") {
-            val hours = listOf("Now", "9 PM", "10 PM", "11 PM", "12 AM", "1 AM", "2 AM")
-            LazyRow {
-                items(hours) { hour ->
-                    HourlyItem(hour, "88°", R.drawable.snow, "10%")
+
+                // Current temperature
+                Log.d("HomeScreen", "HomeScreen: ${responseData.main?.humidity}")
+
+                Text("${responseData?.name}", color = Color.White, fontSize = 20.sp)
+
+                //2nd header row
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.Start
+                    ) {
+                        Text(
+                            text = "${responseData.weather?.get(0)?.description}",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 16.sp,
+                            color = Color.White
+                        )
+                        Text(
+                            text = "${responseData?.name}",
+                            fontSize = 14.sp,
+                            color = Color.DarkGray
+                        )
+                    }
+
+                    GlideImage(
+                        imageModel = { "https://openweathermap.org/img/wn/${responseData.weather?.get(0)?.icon}@2x.png" },
+                        modifier = Modifier
+                            .size(100.dp)
+                            .clip(RoundedCornerShape(10.dp)),
+                        loading = {
+                            CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                        },
+                        failure = {
+                            Image(
+                                painter = painterResource(id = R.drawable.snow),
+                                contentDescription = "Placeholder Image",
+                                modifier = Modifier
+                                    .size(100.dp)
+                                    .clip(RoundedCornerShape(10.dp))
+                            )
+                        }
+                    )
+
+                    Column(
+                        horizontalAlignment = Alignment.End
+                    ) {
+                        val (date, time) = Utility.formatTimestamp(responseData.dt?.times(1000L) ?: 0)
+                        Text(
+                            text = "$time",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 16.sp,
+                            color = Color.White
+                        )
+                        Text(text = "$date", fontSize = 14.sp, color = Color.DarkGray)
+                    }
+                }
+
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        "${responseData?.main?.temp ?: 0}",
+                        color = Color.White,
+                        fontSize = 60.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = "°C", color = Color.White, fontSize = 20.sp, modifier = Modifier
+                            .size(60.dp)
+                            .padding(bottom = 20.dp)
+                    )
+                }
+                Text(
+                    "Feels like ${responseData?.main?.feelsLike ?: 0}°",
+                    color = Color.DarkGray,
+                    fontSize = 16.sp
+                )
+                Text(
+                    "High ${responseData?.main?.tempMax ?: 0}° • Low ${responseData?.main?.tempMin ?: 0}°",
+                    color = Color.DarkGray,
+                    fontSize = 16.sp
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Next hour forecast
+                ForecastCard("Hourly forecast") {
+                    val hours = listOf("Now", "9 PM", "10 PM", "11 PM", "12 AM", "1 AM", "2 AM")
+                    LazyRow {
+                        items(hours) { hour ->
+                            HourlyItem(hour, "88°", "10d", "10%")
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                //row1
+                Row(
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    CircularWithProgressCard(
+                        "Clouds",
+                        "${responseData.clouds?.all}%",
+                        "",
+                        responseData.clouds?.all?.toFloat() ?: 0f,
+                        Color.White,
+                        icon = ImageVector.vectorResource(id = R.drawable.ic_cloud)
+                    )
+                    HumidityCard(responseData.main?.humidity?.toFloat() ?: 0f,
+                        icon = ImageVector.vectorResource(id = R.drawable.ic_humidity))
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                //row2
+                Row(
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    CircularCard(
+                        value = responseData.main?.pressure.toString(),
+                        title = "Pressure",
+                        unit = "hpa",
+                        icon = ImageVector.vectorResource(id = R.drawable.ic_pressure)
+                    )
+
+                    CircularCard(
+                        value = responseData.wind?.speed.toString(),
+                        title = "Wind Speed",
+                        unit = "meter/sec",
+                        icon = ImageVector.vectorResource(id = R.drawable.ic_wind)
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                //row3
+                Row(
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    val visibility = responseData.visibility?.div(1000)?:0
+                    CircularCard(
+                        value = visibility.toString(),
+                        title = "Visibility",
+                        unit = "KM",
+                        icon = ImageVector.vectorResource(id = R.drawable.ic_visibility)
+                    )
+                    val seaLevel : Int = responseData.main?.seaLevel?:0
+                    val grandLevel : Int = responseData.main?.grndLevel?:0
+                    val altitude = Utility.calculateAltitude(seaLevel.toDouble(),grandLevel.toDouble())
+                    CircularCard(
+                        value = altitude.toString(),
+                        title = "Alt",
+                        unit = "m",
+                        icon = ImageVector.vectorResource(id = R.drawable.ic_altitude)
+                    )
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Next 5 days forecast
+                ForecastCard("10-day forecast") {
+                    val days = listOf("Today", "Fri", "Sat", "Sun", "Mon")
+                    Column {
+                        days.forEach { day ->
+                            DailyItem(day, "89°", "81°", R.drawable.header, "20%")
+                        }
+                    }
                 }
             }
         }
 
-        //row1
-        Row(
-            modifier = Modifier.fillMaxSize(),
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            CircularWithProgressCard(
-                "Clouds",
-                "${currentWeatherState.value?.clouds?.all}%",
-                "",
-                currentWeatherState.value?.clouds?.all?.toFloat()?:0f,
-                Color.White
-            )
-            HumidityCard(currentWeatherState.value?.main?.humidity?.toFloat()?:0f)
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        //row2
-        Row(
-            modifier = Modifier.fillMaxSize(),
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            CircularWithProgressCard(
-                "Humidity",
-                "${currentWeatherState.value?.main?.humidity}%",
-                "",
-                currentWeatherState.value?.main?.humidity?.toFloat()?:0f,
-                Color.Blue
-            )
-            CircularCard(
-                value = currentWeatherState.value?.main?.pressure.toString(),
-                title = "Pressure",
-                unit = "hpa",
-                icon = Icons.Default.PlayArrow
+        is Response.Failure -> {
+            Text(
+                text = "sorry there is an error",
+                modifier = Modifier
+                    .fillMaxSize()
+                    .wrapContentSize(),
+                fontSize = 22.sp
             )
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Next 5 days forecast
-        ForecastCard("10-day forecast") {
-            val days = listOf("Today", "Fri", "Sat", "Sun", "Mon")
-            Column {
-                days.forEach { day ->
-                    DailyItem(day, "89°", "81°", R.drawable.header, "20%")
-                }
-            }
-        }
 
     }
+}
+
+@Composable
+fun LoadingIndicator() {
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .wrapContentSize()
+    ) {
+        CircularProgressIndicator()
+    }
+
 }
 
 @Composable
@@ -191,10 +306,26 @@ fun ForecastCard(title: String, content: @Composable () -> Unit) {
 }
 
 @Composable
-fun HourlyItem(time: String, temp: String, icon: Int, chance: String) {
+fun HourlyItem(time: String, temp: String, iconThumbnail: String, chance: String) {
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(8.dp)) {
         Text(time, color = Color.White, fontSize = 14.sp)
-        Image(painter = painterResource(id = icon), contentDescription = null, modifier = Modifier.size(32.dp))
+//        Image(
+//            painter = painterResource(id = icon),
+//            contentDescription = null,
+//            modifier = Modifier.size(32.dp)
+//        )
+        GlideImage(
+            imageModel = { "https://openweathermap.org/img/wn/${iconThumbnail}@2x.png" },
+            modifier = Modifier
+                .size(38.dp)
+                .clip(RoundedCornerShape(10.dp)),
+            loading = {
+                CircularProgressIndicator(modifier = Modifier.size(24.dp))
+            },
+            failure = {
+                Text(text = "Failed to load", color = Color.Red)
+            }
+        )
         Text(temp, color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Bold)
         Text(chance, color = Color.DarkGray, fontSize = 12.sp)
     }
@@ -210,18 +341,23 @@ fun DailyItem(day: String, high: String, low: String, icon: Int, chance: String)
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(day, color = Color.White, fontSize = 16.sp)
-        Image(painter = painterResource(id = icon), contentDescription = null, modifier = Modifier.size(32.dp))
+        Image(
+            painter = painterResource(id = icon),
+            contentDescription = null,
+            modifier = Modifier.size(32.dp)
+        )
         Text("$high / $low", color = Color.White, fontSize = 16.sp)
         Text(chance, color = Color.DarkGray, fontSize = 14.sp)
     }
-    }
+}
 
 @Composable
-fun HumidityCard(humidity: Float) {
+fun HumidityCard(humidity: Float,icon: ImageVector) {
 
     Card(
         modifier = Modifier
             .size(150.dp)
+            .padding(8.dp)
             .clip(RoundedCornerShape(20.dp)),
         colors = CardDefaults.cardColors(
             containerColor = Color.Black // الخلفية الأساسية
@@ -236,11 +372,20 @@ fun HumidityCard(humidity: Float) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(
-                    text = "Humidity",
-                    color = Color.White,
-                    fontSize = 14.sp
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        tint = Color.White,
+                        modifier = Modifier
+                            .size(16.dp)
+                            .padding(end = 4.dp)
+                    )
+                    Text(text = "Humidity", color = Color.White, fontSize = 14.sp)
+                }
                 Text(
                     text = "${humidity.toInt()}%",
                     color = Color.White,
@@ -251,8 +396,6 @@ fun HumidityCard(humidity: Float) {
         }
     }
 }
-
-
 
 
 @Composable
@@ -289,19 +432,22 @@ fun CircularWithProgressCard(
     unit: String,
     progress: Float,
     progressColor: Color,
+    icon: ImageVector,
     modifier: Modifier = Modifier
 ) {
     val progress = animateFloatAsState(targetValue = progress / 100f, animationSpec = tween(1000))
     Card(
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.Black),
         modifier = modifier
-            .size(120.dp)
+            .size(150.dp)
             .padding(8.dp)
+            .clip(RoundedCornerShape(20.dp)),
+        colors = CardDefaults.cardColors(containerColor = Color.Black)
     ) {
         Box(
             contentAlignment = Alignment.Center,
-            modifier = Modifier.padding(4.dp).fillMaxSize()
+            modifier = Modifier
+                .padding(4.dp)
+                .fillMaxSize()
         ) {
             Canvas(modifier = Modifier.fillMaxSize()) {
                 drawArc(
@@ -314,8 +460,26 @@ fun CircularWithProgressCard(
             }
 
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(text = title, color = Color.White, fontSize = 12.sp)
-                Text(text = value, color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        tint = Color.White,
+                        modifier = Modifier
+                            .size(16.dp)
+                            .padding(end = 4.dp)
+                    )
+                    Text(text = title, color = Color.White, fontSize = 14.sp)
+                }
+                Text(
+                    text = value,
+                    color = Color.White,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold
+                )
                 Text(text = unit, color = Color.DarkGray, fontSize = 10.sp)
             }
         }
@@ -332,10 +496,10 @@ fun CircularCard(
     modifier: Modifier = Modifier
 ) {
     Card(
-        shape = CircleShape, // جعل الكارد دائريًا
+        shape = CircleShape,
         colors = CardDefaults.cardColors(containerColor = Color.Black),
         modifier = modifier
-            .size(120.dp)
+            .size(150.dp)
             .padding(8.dp)
     ) {
         Column(
@@ -351,9 +515,11 @@ fun CircularCard(
                     imageVector = icon,
                     contentDescription = null,
                     tint = Color.White,
-                    modifier = Modifier.size(16.dp).padding(end = 4.dp)
+                    modifier = Modifier
+                        .size(16.dp)
+                        .padding(end = 4.dp)
                 )
-                Text(text = title, color = Color.White, fontSize = 12.sp)
+                Text(text = title, color = Color.White, fontSize = 14.sp)
             }
             Text(text = value, color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Bold)
             Text(text = unit, color = Color.DarkGray, fontSize = 10.sp)
