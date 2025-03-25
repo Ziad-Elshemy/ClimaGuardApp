@@ -22,7 +22,7 @@ import eg.iti.mad.climaguard.test.SpeedometerProgress
 @Composable
 fun WeatherScreen(viewModel: HomeViewModel) {
 
-    viewModel.getCurrentWeather()
+//    viewModel.getCurrentWeather()
 
     Box (modifier = Modifier
         .fillMaxSize(),

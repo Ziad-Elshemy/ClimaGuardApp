@@ -1,6 +1,7 @@
 package eg.iti.mad.climaguard.navigation
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Person
@@ -19,8 +20,9 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 sealed class NavigationRoute(val route: String) {
     object Home : NavigationRoute("home_screen")
     object Profile : NavigationRoute("profile_screen")
-    object Maps : NavigationRoute("maps_screen")
+    object Favorite : NavigationRoute("favorite_screen")
     object Setting : NavigationRoute("setting_screen")
+    object Maps : NavigationRoute("maps_screen")
 }
 
 @Composable
@@ -28,7 +30,7 @@ fun BottomNavigationBar(navController: NavController) {
     val navigationItems = listOf(
         NavigationItem("Home", Icons.Default.Home, NavigationRoute.Home.route),
         NavigationItem("Profile", Icons.Default.Person, NavigationRoute.Profile.route),
-        NavigationItem("Maps", Icons.Default.LocationOn, NavigationRoute.Maps.route),
+        NavigationItem("Favorite", Icons.Default.Favorite, NavigationRoute.Favorite.route),
         NavigationItem("Setting", Icons.Default.Settings, NavigationRoute.Setting.route)
     )
 
@@ -37,29 +39,34 @@ fun BottomNavigationBar(navController: NavController) {
         it.route == currentDestination?.destination?.route
     }.coerceAtLeast(0)
 
-    NavigationBar(containerColor = Color.White) {
-        navigationItems.forEachIndexed { index, item ->
-            NavigationBarItem(
-                selected = selectedNavigationIndex == index,
-                onClick = {
-                    if (currentDestination?.destination?.route != item.route) {
-                        navController.navigate(item.route) {
-                            popUpTo(navController.graph.startDestinationId) {
-                                saveState = true
+    val shouldShowBottomNav = currentDestination?.destination?.route != NavigationRoute.Maps.route
+
+    if (shouldShowBottomNav){
+        NavigationBar(containerColor = Color.White) {
+            navigationItems.forEachIndexed { index, item ->
+                NavigationBarItem(
+                    selected = selectedNavigationIndex == index,
+                    onClick = {
+                        if (currentDestination?.destination?.route != item.route) {
+                            navController.navigate(item.route) {
+                                popUpTo(navController.graph.startDestinationId) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
                             }
-                            launchSingleTop = true
-                            restoreState = true
                         }
-                    }
-                },
-                icon = { Icon(imageVector = item.icon, contentDescription = item.title) },
-                label = {
-                    if (index == selectedNavigationIndex) {Text(item.title, color = if (index == selectedNavigationIndex) Color.Black else Color.Gray)} },
-                colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = MaterialTheme.colorScheme.surface,
-                    indicatorColor = MaterialTheme.colorScheme.primary
+                    },
+                    icon = { Icon(imageVector = item.icon, contentDescription = item.title) },
+                    label = {
+                        if (index == selectedNavigationIndex) {Text(item.title, color = if (index == selectedNavigationIndex) Color.Black else Color.Gray)} },
+                    colors = NavigationBarItemDefaults.colors(
+                        selectedIconColor = MaterialTheme.colorScheme.surface,
+                        indicatorColor = MaterialTheme.colorScheme.primary
+                    )
                 )
-            )
+            }
         }
     }
+
 }

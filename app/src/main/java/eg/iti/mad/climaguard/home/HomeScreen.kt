@@ -1,5 +1,6 @@
 package eg.iti.mad.climaguard.home
 
+import android.location.Location
 import android.util.Log
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -62,8 +63,8 @@ import java.util.Locale
 import kotlin.math.sin
 
 @Composable
-fun HomeScreen(viewModel: HomeViewModel) {
-    viewModel.getCurrentWeather()
+fun HomeScreen(viewModel: HomeViewModel,location: Location) {
+    viewModel.getCurrentWeather(location.latitude,location.longitude)
 //    val currentWeatherState = viewModel.currentResponse.observeAsState()
     val uiState by viewModel.currentResponse.collectAsStateWithLifecycle()
 

@@ -29,12 +29,12 @@ class HomeViewModel(private val repo: Repository) : ViewModel() {
     val toastMessage = _toastMessage.asSharedFlow()
 
 
-    fun getCurrentWeather() {
+    fun getCurrentWeather(lat :Double, lon :Double) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
 
                 //the view model must get the lat and long from GPS
-                val response = repo.getCurrentWeather(29.39, 30.87)
+                val response = repo.getCurrentWeather(lat, lon)
                 response
                     .catch { ex ->
                         _currentWeather.value = Response.Failure(ex)
