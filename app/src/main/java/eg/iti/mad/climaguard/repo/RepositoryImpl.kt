@@ -2,6 +2,7 @@ package eg.iti.mad.climaguard.repo
 
 import eg.iti.mad.climaguard.api.WeatherRemoteDataSource
 import eg.iti.mad.climaguard.model.CurrentResponse
+import eg.iti.mad.climaguard.model.ForecastResponse
 import kotlinx.coroutines.flow.Flow
 
 class RepositoryImpl private constructor(
@@ -11,11 +12,9 @@ class RepositoryImpl private constructor(
         return weatherRemoteDataSource.getCurrentWeather(lat,long)
     }
 
-
-
-
-
-
+    override suspend fun getForecastWeather(lat: Double, long: Double): Flow<ForecastResponse> {
+        return weatherRemoteDataSource.getForecastWeather(lat,long)
+    }
 
 
     companion object {

@@ -52,7 +52,10 @@ import eg.iti.mad.climaguard.navigation.BottomNavigationBar
 import eg.iti.mad.climaguard.navigation.NavigationRoute
 import eg.iti.mad.climaguard.profile.ProfileScreen
 import eg.iti.mad.climaguard.repo.RepositoryImpl
-import eg.iti.mad.climaguard.settings.SettingScreen
+import eg.iti.mad.climaguard.settings.SettingsDataStore
+import eg.iti.mad.climaguard.settings.SettingsFactory
+import eg.iti.mad.climaguard.settings.SettingsScreen
+import eg.iti.mad.climaguard.settings.SettingsViewModel
 import eg.iti.mad.climaguard.ui.theme.ClimaGuardTheme
 
 class MainActivity : ComponentActivity() {
@@ -62,6 +65,7 @@ class MainActivity : ComponentActivity() {
     var address : MutableState<String> = mutableStateOf("")
     val REQUEST_LOCATION_CODE = 101
     lateinit var geocoder : Geocoder
+    lateinit var settingsDataStore: SettingsDataStore
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -69,6 +73,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         geocoder = Geocoder(this)
+        settingsDataStore = SettingsDataStore(this)
 
         val homeViewModel = ViewModelProvider(
             this@MainActivity,
@@ -77,14 +82,22 @@ class MainActivity : ComponentActivity() {
                     WeatherRemoteDataSourceImpl(
                         ApiManager.getApis()
                     )
-                )
+                ),settingsDataStore
             )
+
         ).get(HomeViewModel::class.java)
 
         val mapViewModel = ViewModelProvider(
             this,
             factory = MapFactory(geocoder)
         ).get(MapViewModel::class.java)
+
+        val settingsViewModel = ViewModelProvider(
+            this,
+            factory = SettingsFactory(
+                settingsDataStore
+            )
+        ).get(SettingsViewModel::class.java)
 
 
         setContent {
@@ -111,7 +124,7 @@ class MainActivity : ComponentActivity() {
                                 FavoriteScreen(navController)
                             }
                             composable(route = NavigationRoute.Setting.route) {
-                                SettingScreen()
+                                SettingsScreen(navController,settingsViewModel)
                             }
                             composable(route = NavigationRoute.Home.route) {
                                 HomeScreen(
@@ -121,16 +134,7 @@ class MainActivity : ComponentActivity() {
                             }
                             composable(route = NavigationRoute.Profile.route) {
                                 ProfileScreen(
-                                    ViewModelProvider(
-                                        this@MainActivity,
-                                        factory = HomeFactory(
-                                            RepositoryImpl.getInstance(
-                                                WeatherRemoteDataSourceImpl(
-                                                    ApiManager.getApis()
-                                                )
-                                            )
-                                        )
-                                    ).get(HomeViewModel::class.java)
+                                    homeViewModel
                                 )
                             }
                         }

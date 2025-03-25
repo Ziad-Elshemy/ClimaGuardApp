@@ -55,6 +55,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.skydoves.landscapist.glide.GlideImage
 import eg.iti.mad.climaguard.R
+import eg.iti.mad.climaguard.model.ForecastResponse
 import eg.iti.mad.climaguard.model.Response
 import eg.iti.mad.climaguard.utils.Utility
 import java.text.SimpleDateFormat
@@ -64,9 +65,31 @@ import kotlin.math.sin
 
 @Composable
 fun HomeScreen(viewModel: HomeViewModel,location: Location) {
-    viewModel.getCurrentWeather(location.latitude,location.longitude)
+
+//    LaunchedEffect(location.latitude, location.longitude) {
+        viewModel.updateLocation(location.latitude, location.longitude)
+//    }
+
+//    viewModel.fetchWeatherData(location.latitude,location.longitude)
+
 //    val currentWeatherState = viewModel.currentResponse.observeAsState()
     val uiState by viewModel.currentResponse.collectAsStateWithLifecycle()
+    val uiForecastState by viewModel.forecastResponse.collectAsStateWithLifecycle()
+    val hourlyList by viewModel.forecastResponseList.collectAsStateWithLifecycle()
+
+    var responseForecast:ForecastResponse? = null
+    when(uiForecastState){
+        is Response.Loading -> {
+
+        }
+        is Response.Success -> {
+            responseForecast = (uiForecastState as Response.Success).data
+        }
+        is Response.Failure -> {
+
+        }
+    }
+
 
     when (uiState) {
         is Response.Loading -> {
@@ -80,8 +103,8 @@ fun HomeScreen(viewModel: HomeViewModel,location: Location) {
                     .verticalScroll(rememberScrollState())
                     .fillMaxSize()
                     .background(
-                        if (!Utility.isDayTime(responseData.dt?.toLong()?:0L))
-                        Color(0xFF2F4042) else Color(0xFF95CBD2)
+                        if (!Utility.isDayTime(responseData.dt?.toLong() ?: 0L))
+                            Color(0xFF2F4042) else Color(0xFF95CBD2)
                     )
                     .padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
@@ -91,7 +114,7 @@ fun HomeScreen(viewModel: HomeViewModel,location: Location) {
                 // Current temperature
                 Log.d("HomeScreen", "HomeScreen: ${responseData.main?.humidity}")
 
-                Text("${responseData?.name}", color = Color.White, fontSize = 20.sp)
+                Text("${responseData.name}", color = Color.White, fontSize = 20.sp)
 
                 //2nd header row
                 Row(
@@ -111,7 +134,7 @@ fun HomeScreen(viewModel: HomeViewModel,location: Location) {
                             color = Color.White
                         )
                         Text(
-                            text = "${responseData?.name}",
+                            text = "${responseForecast?.city?.country}, ${responseForecast?.city?.name}",
                             fontSize = 14.sp,
                             color = Color.DarkGray
                         )
@@ -163,24 +186,30 @@ fun HomeScreen(viewModel: HomeViewModel,location: Location) {
                             .padding(bottom = 20.dp)
                     )
                 }
+
                 Text(
                     "Feels like ${responseData?.main?.feelsLike ?: 0}°",
                     color = Color.DarkGray,
                     fontSize = 16.sp
                 )
+
                 Text(
                     "High ${responseData?.main?.tempMax ?: 0}° • Low ${responseData?.main?.tempMin ?: 0}°",
                     color = Color.DarkGray,
                     fontSize = 16.sp
                 )
+
                 Spacer(modifier = Modifier.height(16.dp))
 
                 // Next hour forecast
                 ForecastCard("Hourly forecast") {
-                    val hours = listOf("Now", "9 PM", "10 PM", "11 PM", "12 AM", "1 AM", "2 AM")
                     LazyRow {
-                        items(hours) { hour ->
-                            HourlyItem(hour, "88°", "10d", "10%")
+                        items(hourlyList.orEmpty()) { hourlyItem ->
+                            hourlyItem?.let {
+                                val (date, time) = Utility.formatTimestamp(hourlyItem.dt?.times(1000L) ?: 0)
+                                HourlyItem(time, "${hourlyItem.main?.temp}°", hourlyItem.weather?.get(0)?.icon?:"10d" , "10%")
+                            }
+
                         }
                     }
                 }
@@ -253,12 +282,18 @@ fun HomeScreen(viewModel: HomeViewModel,location: Location) {
                 Spacer(modifier = Modifier.height(16.dp))
 
                 // Next 5 days forecast
-                ForecastCard("10-day forecast") {
+                ForecastCard("5-day forecast") {
                     val days = listOf("Today", "Fri", "Sat", "Sun", "Mon")
                     Column {
-                        days.forEach { day ->
-                            DailyItem(day, "89°", "81°", R.drawable.header, "20%")
+                        hourlyList?.forEach{ hourlyItem ->
+                            val (date,time) = Utility.formatTimestamp(hourlyItem?.dt?.times(1000L)?:0)
+                            DailyItem(time,
+                                "${hourlyItem?.main?.tempMax}","${hourlyItem?.main?.tempMin}"
+                                ,hourlyItem?.weather?.get(0)?.icon?:"10d","10")
                         }
+//                        days.forEach { day ->
+//                            DailyItem(day, "89°", "81°", R.drawable.header, "20%")
+//                        }
                     }
                 }
             }
@@ -333,7 +368,7 @@ fun HourlyItem(time: String, temp: String, iconThumbnail: String, chance: String
 }
 
 @Composable
-fun DailyItem(day: String, high: String, low: String, icon: Int, chance: String) {
+fun DailyItem(day: String, high: String, low: String, iconThumbnail: String, chance: String) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -342,12 +377,19 @@ fun DailyItem(day: String, high: String, low: String, icon: Int, chance: String)
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(day, color = Color.White, fontSize = 16.sp)
-        Image(
-            painter = painterResource(id = icon),
-            contentDescription = null,
-            modifier = Modifier.size(32.dp)
+        GlideImage(
+            imageModel = { "https://openweathermap.org/img/wn/${iconThumbnail}@2x.png" },
+            modifier = Modifier
+                .size(38.dp)
+                .clip(RoundedCornerShape(10.dp)),
+            loading = {
+                CircularProgressIndicator(modifier = Modifier.size(24.dp))
+            },
+            failure = {
+                Text(text = "Failed to load", color = Color.Red)
+            }
         )
-        Text("$high / $low", color = Color.White, fontSize = 16.sp)
+        Text("$high° / $low°", color = Color.White, fontSize = 16.sp)
         Text(chance, color = Color.DarkGray, fontSize = 14.sp)
     }
 }
