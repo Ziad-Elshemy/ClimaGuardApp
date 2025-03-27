@@ -92,5 +92,7 @@ dependencies {
     implementation ("androidx.compose.runtime:runtime-livedata:$compose_version")
     //dataStore
     implementation("androidx.datastore:datastore-preferences:1.0.0")
+    //icons
+    implementation("androidx.compose.material:material-icons-extended:1.5.0")
 
 }

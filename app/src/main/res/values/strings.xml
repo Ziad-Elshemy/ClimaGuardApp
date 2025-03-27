@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">ClimaGuard</string>
     <string name="title_activity_main2">MainActivity2</string>
+    <string name="feels_like">Feels like</string>
+    <string name="high">"High "</string>
+    <string name="low">" Low"</string>
 </resources>

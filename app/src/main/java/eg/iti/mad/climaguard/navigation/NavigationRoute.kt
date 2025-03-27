@@ -1,6 +1,8 @@
 package eg.iti.mad.climaguard.navigation
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Alarm
+import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LocationOn
@@ -19,7 +21,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 
 sealed class NavigationRoute(val route: String) {
     object Home : NavigationRoute("home_screen")
-    object Profile : NavigationRoute("profile_screen")
+    object Alarm : NavigationRoute("alarm_screen")
     object Favorite : NavigationRoute("favorite_screen")
     object Setting : NavigationRoute("setting_screen")
     object Maps : NavigationRoute("maps_screen")
@@ -28,8 +30,8 @@ sealed class NavigationRoute(val route: String) {
 @Composable
 fun BottomNavigationBar(navController: NavController) {
     val navigationItems = listOf(
-        NavigationItem("Home", Icons.Default.Home, NavigationRoute.Home.route),
-        NavigationItem("Profile", Icons.Default.Person, NavigationRoute.Profile.route),
+        NavigationItem("Home", Icons.Default.Cloud, NavigationRoute.Home.route),
+        NavigationItem("Alarm", Icons.Default.Alarm, NavigationRoute.Alarm.route),
         NavigationItem("Favorite", Icons.Default.Favorite, NavigationRoute.Favorite.route),
         NavigationItem("Setting", Icons.Default.Settings, NavigationRoute.Setting.route)
     )

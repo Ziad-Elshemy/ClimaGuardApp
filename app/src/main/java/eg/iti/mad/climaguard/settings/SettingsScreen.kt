@@ -1,21 +1,24 @@
 package eg.iti.mad.climaguard.settings
 
+import android.app.Activity
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Language
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Speed
+import androidx.compose.material.icons.filled.Thermostat
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.remember
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 
 @Composable
@@ -25,48 +28,86 @@ fun SettingsScreen(navController: NavController, viewModel: SettingsViewModel) {
     val selectedWindSpeedUnit by viewModel.windSpeedUnit.collectAsState()
     val selectedLanguage by viewModel.language.collectAsState()
 
-    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-        Text(text = "Settings", style = MaterialTheme.typography.headlineMedium, modifier = Modifier.padding(bottom = 16.dp))
-
-        // Location Selection
-        Text(text = "Location", style = MaterialTheme.typography.bodyLarge)
-        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-            RadioButton(selected = isGpsEnabled, onClick = { viewModel.saveSettings(true, selectedTemperatureUnit, selectedWindSpeedUnit, selectedLanguage) })
-            Text(text = "Use GPS", modifier = Modifier.padding(start = 8.dp))
-            Spacer(modifier = Modifier.weight(1f))
-            RadioButton(selected = !isGpsEnabled, onClick = { viewModel.saveSettings(false, selectedTemperatureUnit, selectedWindSpeedUnit, selectedLanguage) })
-            Text(text = "Pick from Map", modifier = Modifier.padding(start = 8.dp))
-        }
-
-        // Temperature Unit Selection
-        Text(text = "Temperature Unit", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.padding(top = 16.dp))
-        TemperatureUnitDropdown(selectedTemperatureUnit) { newUnit ->
-            viewModel.saveSettings(isGpsEnabled, newUnit, if (newUnit == "imperial") "miles/hour" else "meter/sec", selectedLanguage)
-        }
-
-        // Wind Speed Unit Selection
-        Text(text = "Wind Speed Unit", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.padding(top = 16.dp))
-        WindSpeedUnitDropdown(selectedWindSpeedUnit) { newUnit ->
-            viewModel.saveSettings(isGpsEnabled, if (newUnit == "miles/hour") "imperial" else "metric", newUnit, selectedLanguage)
-        }
-
-        // Language Selection
-        Text(text = "Language", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.padding(top = 16.dp))
-        LanguageDropdown(selectedLanguage) { viewModel.saveSettings(isGpsEnabled, selectedTemperatureUnit, selectedWindSpeedUnit, it) }
-
-        // Save Button
-        Spacer(modifier = Modifier.height(24.dp))
-        Button(
-            onClick = {
-                viewModel.saveSettings(isGpsEnabled, selectedTemperatureUnit, selectedWindSpeedUnit, selectedLanguage)
-                navController.popBackStack()
-            },
-            modifier = Modifier.fillMaxWidth()
+    Scaffold { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color(0xFF95CBD2))
+                .padding(paddingValues)
+                .padding(16.dp)
         ) {
-            Text(text = "Save Settings")
+            Text(
+                text = "Settings",
+                style = MaterialTheme.typography.headlineMedium,
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
+
+            // 📍 Location Selection
+            SectionTitle("Location", Icons.Default.LocationOn)
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+                RadioButton(
+                    selected = isGpsEnabled,
+                    onClick = { viewModel.saveSettings(true, selectedTemperatureUnit, selectedWindSpeedUnit, selectedLanguage) }
+                )
+                Text(text = "Use GPS", modifier = Modifier.padding(start = 8.dp))
+                Spacer(modifier = Modifier.weight(1f))
+                RadioButton(
+                    selected = !isGpsEnabled,
+                    onClick = { viewModel.saveSettings(false, selectedTemperatureUnit, selectedWindSpeedUnit, selectedLanguage) }
+                )
+                Text(text = "Pick from Map", modifier = Modifier.padding(start = 8.dp))
+            }
+            Divider(modifier = Modifier.padding(vertical = 12.dp))
+
+            // 🌡 Temperature Unit Selection
+            SectionTitle("Temperature Unit", Icons.Default.Thermostat)
+            TemperatureUnitDropdown(selectedTemperatureUnit) { newUnit ->
+                viewModel.saveSettings(isGpsEnabled, newUnit, if (newUnit == "imperial") "miles/hour" else "meter/sec", selectedLanguage)
+            }
+            Divider(modifier = Modifier.padding(vertical = 12.dp))
+
+            // 💨 Wind Speed Unit Selection
+            SectionTitle("Wind Speed Unit", Icons.Default.Speed)
+            WindSpeedUnitDropdown(selectedWindSpeedUnit) { newUnit ->
+                viewModel.saveSettings(isGpsEnabled, if (newUnit == "miles/hour") "imperial" else "metric", newUnit, selectedLanguage)
+            }
+            Divider(modifier = Modifier.padding(vertical = 12.dp))
+
+            // 🌍 Language Selection
+            SectionTitle("Language", Icons.Default.Language)
+            LanguageDropdown(selectedLanguage) {
+                viewModel.saveSettings(isGpsEnabled, selectedTemperatureUnit, selectedWindSpeedUnit, it)
+            }
+
+            // 💾 Save Button
+            Spacer(modifier = Modifier.height(24.dp))
+            val context = LocalContext.current
+            Button(
+                onClick = {
+                    viewModel.saveSettings(isGpsEnabled, selectedTemperatureUnit, selectedWindSpeedUnit, selectedLanguage)
+                    // Restart the MainActivity to apply changes
+                    val activity = context as? Activity
+                    val intent = activity?.intent
+                    activity?.finish()
+                    activity?.startActivity(intent)
+                },
+                modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(8.dp))
+            ) {
+                Text(text = "Save Settings", fontSize = 18.sp)
+            }
         }
     }
 }
+
+@Composable
+fun SectionTitle(title: String, icon: androidx.compose.ui.graphics.vector.ImageVector) {
+    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 8.dp)) {
+        Icon(imageVector = icon, contentDescription = null, modifier = Modifier.size(24.dp))
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(text = title, style = MaterialTheme.typography.bodyLarge)
+    }
+}
+
 
 
 

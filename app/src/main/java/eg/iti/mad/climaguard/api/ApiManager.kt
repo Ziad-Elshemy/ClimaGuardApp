@@ -10,7 +10,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 class ApiManager {
     companion object{
         private var retrofit: Retrofit?=null
-        private val BASE_URL = "https://api.openweathermap.org/data/2.5/"
+        private val BASE_URL = "https://api.openweathermap.org/"
 
         private fun getInstance():Retrofit{
             if (retrofit==null){
