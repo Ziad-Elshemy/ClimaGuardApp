@@ -22,13 +22,17 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -48,12 +52,22 @@ import eg.iti.mad.climaguard.map.MapViewModel
 import eg.iti.mad.climaguard.home.HomeFactory
 import eg.iti.mad.climaguard.home.HomeScreen
 import eg.iti.mad.climaguard.home.HomeViewModel
+import eg.iti.mad.climaguard.local.LocationsLocalDataSourceImpl
+import eg.iti.mad.climaguard.local.MyDatabase
 import eg.iti.mad.climaguard.navigation.BottomNavigationBar
 import eg.iti.mad.climaguard.navigation.NavigationRoute
 import eg.iti.mad.climaguard.profile.ProfileScreen
+import eg.iti.mad.climaguard.repo.Repository
 import eg.iti.mad.climaguard.repo.RepositoryImpl
-import eg.iti.mad.climaguard.settings.SettingScreen
+import eg.iti.mad.climaguard.settings.SettingsDataStore
+import eg.iti.mad.climaguard.settings.SettingsFactory
+import eg.iti.mad.climaguard.settings.SettingsScreen
+import eg.iti.mad.climaguard.settings.SettingsViewModel
 import eg.iti.mad.climaguard.ui.theme.ClimaGuardTheme
+import eg.iti.mad.climaguard.utils.Utility.Companion.setAppLocale
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 class MainActivity : ComponentActivity() {
     private val TAG = "MainActivity"
@@ -62,6 +76,8 @@ class MainActivity : ComponentActivity() {
     var address : MutableState<String> = mutableStateOf("")
     val REQUEST_LOCATION_CODE = 101
     lateinit var geocoder : Geocoder
+    lateinit var settingsDataStore: SettingsDataStore
+    lateinit var repo :Repository
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -69,79 +85,98 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         geocoder = Geocoder(this)
+        settingsDataStore = SettingsDataStore(this)
+
+        lifecycleScope.launch {
+            val language = settingsDataStore.language.first()
+            setAppLocale(this@MainActivity, language)
+        }
+
+        repo = RepositoryImpl.getInstance(
+            WeatherRemoteDataSourceImpl(
+                ApiManager.getApis()
+            ),LocationsLocalDataSourceImpl(
+                MyDatabase.getInstance(this@MainActivity).locationDao()
+            )
+        )
 
         val homeViewModel = ViewModelProvider(
             this@MainActivity,
             factory = HomeFactory(
-                RepositoryImpl.getInstance(
-                    WeatherRemoteDataSourceImpl(
-                        ApiManager.getApis()
-                    )
-                )
+                repo
+                ,settingsDataStore
             )
+
         ).get(HomeViewModel::class.java)
 
         val mapViewModel = ViewModelProvider(
             this,
-            factory = MapFactory(geocoder)
+            factory = MapFactory(
+                repo)
         ).get(MapViewModel::class.java)
+
+        val settingsViewModel = ViewModelProvider(
+            this,
+            factory = SettingsFactory(
+                settingsDataStore
+            )
+        ).get(SettingsViewModel::class.java)
 
 
         setContent {
-            locationState = remember { mutableStateOf(Location(LocationManager.GPS_PROVIDER)) }
+
+            val language = runBlocking { settingsDataStore.language.first() }
+            val layoutDirection = if (language == "ar") LayoutDirection.Rtl else LayoutDirection.Ltr
+
+            CompositionLocalProvider(LocalLayoutDirection provides layoutDirection) {
+                locationState = remember { mutableStateOf(Location(LocationManager.GPS_PROVIDER)) }
 //            MapScreen()
-            ClimaGuardTheme {
-                val navController = rememberNavController()
+                ClimaGuardTheme {
+                    val navController = rememberNavController()
 
-                Scaffold(
-                    modifier = Modifier
-                        .fillMaxSize(),
-                    bottomBar = { BottomNavigationBar(navController) }
-                ) { innerPadding ->
+                    Scaffold(
+                        modifier = Modifier
+                            .fillMaxSize(),
+                        bottomBar = { BottomNavigationBar(navController) }
+                    ) { innerPadding ->
 
-                    val graph =
-                        navController.createGraph(startDestination = NavigationRoute.Home.route) {
-                            composable(route = NavigationRoute.Maps.route) {
-                                MapScreen(
-                                    mapViewModel
-                                    , locationState.value
-                                )
+                        val graph =
+                            navController.createGraph(startDestination = NavigationRoute.Home.route) {
+                                composable(route = NavigationRoute.Maps.route) {
+                                    MapScreen(
+                                        mapViewModel
+                                        , locationState.value
+                                    )
+                                }
+                                composable(route = NavigationRoute.Favorite.route) {
+                                    FavoriteScreen(navController)
+                                }
+                                composable(route = NavigationRoute.Setting.route) {
+                                    SettingsScreen(navController,settingsViewModel)
+                                }
+                                composable(route = NavigationRoute.Home.route) {
+                                    HomeScreen(
+                                        homeViewModel,
+                                        locationState.value
+                                    )
+                                }
+                                composable(route = NavigationRoute.Alarm.route) {
+                                    ProfileScreen(
+                                        homeViewModel
+                                    )
+                                }
                             }
-                            composable(route = NavigationRoute.Favorite.route) {
-                                FavoriteScreen(navController)
-                            }
-                            composable(route = NavigationRoute.Setting.route) {
-                                SettingScreen()
-                            }
-                            composable(route = NavigationRoute.Home.route) {
-                                HomeScreen(
-                                    homeViewModel,
-                                    locationState.value
-                                )
-                            }
-                            composable(route = NavigationRoute.Profile.route) {
-                                ProfileScreen(
-                                    ViewModelProvider(
-                                        this@MainActivity,
-                                        factory = HomeFactory(
-                                            RepositoryImpl.getInstance(
-                                                WeatherRemoteDataSourceImpl(
-                                                    ApiManager.getApis()
-                                                )
-                                            )
-                                        )
-                                    ).get(HomeViewModel::class.java)
-                                )
-                            }
-                        }
-                    NavHost(
-                        navController = navController,
-                        graph = graph,
-                        modifier = Modifier.padding(innerPadding)
-                    )
+                        NavHost(
+                            navController = navController,
+                            graph = graph,
+                            modifier = Modifier.padding(innerPadding)
+                        )
 
+                    }
                 }
             }
+
+
 
         }
 

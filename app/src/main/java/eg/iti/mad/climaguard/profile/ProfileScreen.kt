@@ -8,8 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import eg.iti.mad.climaguard.home.HomeViewModel
-import eg.iti.mad.sharedandstateflow.WeatherHomeScreen
-import eg.iti.mad.sharedandstateflow.WeatherScreen
+
 
 @Composable
     fun ProfileScreen(viewModel: HomeViewModel){
@@ -17,10 +16,9 @@ import eg.iti.mad.sharedandstateflow.WeatherScreen
             .fillMaxSize(),
             contentAlignment = Alignment.Center
         ){
-//            Text(
-//                text = "Profile Screen",
-//                style = MaterialTheme.typography.headlineLarge
-//            )
-            WeatherScreen(viewModel)
+            Text(
+                text = "Alarm Screen",
+                style = MaterialTheme.typography.headlineLarge
+            )
         }
     }
