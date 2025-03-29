@@ -4,4 +4,14 @@
     <string name="feels_like">Feels like</string>
     <string name="high">"High "</string>
     <string name="low">" Low"</string>
+    <string name="failed_to_fetch_data">Failed to fetch data</string>
+    <string name="hourly_forecast">Hourly forecast</string>
+    <string name="clouds">Clouds</string>
+    <string name="pressure">Pressure</string>
+    <string name="wind_speed">Wind Speed</string>
+    <string name="visibility">Visibility</string>
+    <string name="alt">Alt</string>
+    <string name="_5_day_forecast">5-day forecast</string>
+    <string name="failed_to_load">Failed to load</string>
+    <string name="humidity">Humidity</string>
 </resources>

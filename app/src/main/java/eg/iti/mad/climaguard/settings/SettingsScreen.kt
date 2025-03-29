@@ -15,6 +15,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -32,7 +34,13 @@ fun SettingsScreen(navController: NavController, viewModel: SettingsViewModel) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color(0xFF95CBD2))
+                .background(
+                    brush = Brush.linearGradient(
+                        colors = listOf(Color(0xFFF8E9E4), Color(0xFFC3D1F3)),
+                        start = Offset(0f, 0f),
+                        end = Offset(0f, 4000f)
+                    )
+                )
                 .padding(paddingValues)
                 .padding(16.dp)
         ) {
@@ -42,7 +50,7 @@ fun SettingsScreen(navController: NavController, viewModel: SettingsViewModel) {
                 modifier = Modifier.padding(bottom = 16.dp)
             )
 
-            // 📍 Location Selection
+            // Location Selection
             SectionTitle("Location", Icons.Default.LocationOn)
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
                 RadioButton(
@@ -59,27 +67,27 @@ fun SettingsScreen(navController: NavController, viewModel: SettingsViewModel) {
             }
             Divider(modifier = Modifier.padding(vertical = 12.dp))
 
-            // 🌡 Temperature Unit Selection
+            // Temperature Unit Selection
             SectionTitle("Temperature Unit", Icons.Default.Thermostat)
             TemperatureUnitDropdown(selectedTemperatureUnit) { newUnit ->
                 viewModel.saveSettings(isGpsEnabled, newUnit, if (newUnit == "imperial") "miles/hour" else "meter/sec", selectedLanguage)
             }
             Divider(modifier = Modifier.padding(vertical = 12.dp))
 
-            // 💨 Wind Speed Unit Selection
+            // Wind Speed Unit Selection
             SectionTitle("Wind Speed Unit", Icons.Default.Speed)
             WindSpeedUnitDropdown(selectedWindSpeedUnit) { newUnit ->
                 viewModel.saveSettings(isGpsEnabled, if (newUnit == "miles/hour") "imperial" else "metric", newUnit, selectedLanguage)
             }
             Divider(modifier = Modifier.padding(vertical = 12.dp))
 
-            // 🌍 Language Selection
+            // Language Selection
             SectionTitle("Language", Icons.Default.Language)
             LanguageDropdown(selectedLanguage) {
                 viewModel.saveSettings(isGpsEnabled, selectedTemperatureUnit, selectedWindSpeedUnit, it)
             }
 
-            // 💾 Save Button
+            // Save Button
             Spacer(modifier = Modifier.height(24.dp))
             val context = LocalContext.current
             Button(

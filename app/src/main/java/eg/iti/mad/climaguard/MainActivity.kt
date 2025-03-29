@@ -24,6 +24,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -45,7 +47,10 @@ import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import eg.iti.mad.climaguard.api.WeatherRemoteDataSourceImpl
+import eg.iti.mad.climaguard.favitemscreen.FavItemScreen
+import eg.iti.mad.climaguard.favorite.FavoriteFactory
 import eg.iti.mad.climaguard.favorite.FavoriteScreen
+import eg.iti.mad.climaguard.favorite.FavoriteViewModel
 import eg.iti.mad.climaguard.map.MapFactory
 import eg.iti.mad.climaguard.map.MapScreen
 import eg.iti.mad.climaguard.map.MapViewModel
@@ -65,6 +70,9 @@ import eg.iti.mad.climaguard.settings.SettingsScreen
 import eg.iti.mad.climaguard.settings.SettingsViewModel
 import eg.iti.mad.climaguard.ui.theme.ClimaGuardTheme
 import eg.iti.mad.climaguard.utils.Utility.Companion.setAppLocale
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -72,12 +80,14 @@ import kotlinx.coroutines.runBlocking
 class MainActivity : ComponentActivity() {
     private val TAG = "MainActivity"
     private lateinit var fusedLocationProviderClient : FusedLocationProviderClient
-    lateinit var locationState : MutableState<Location>
     var address : MutableState<String> = mutableStateOf("")
     val REQUEST_LOCATION_CODE = 101
     lateinit var geocoder : Geocoder
     lateinit var settingsDataStore: SettingsDataStore
     lateinit var repo :Repository
+
+    private val _locationState = MutableStateFlow(Location(LocationManager.GPS_PROVIDER))
+    val locationState: StateFlow<Location> = _locationState.asStateFlow()
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -109,6 +119,12 @@ class MainActivity : ComponentActivity() {
 
         ).get(HomeViewModel::class.java)
 
+        val favoriteViewModel = ViewModelProvider(
+            this,
+            factory = FavoriteFactory(
+                repo)
+        ).get(FavoriteViewModel::class.java)
+
         val mapViewModel = ViewModelProvider(
             this,
             factory = MapFactory(
@@ -129,7 +145,7 @@ class MainActivity : ComponentActivity() {
             val layoutDirection = if (language == "ar") LayoutDirection.Rtl else LayoutDirection.Ltr
 
             CompositionLocalProvider(LocalLayoutDirection provides layoutDirection) {
-                locationState = remember { mutableStateOf(Location(LocationManager.GPS_PROVIDER)) }
+//                locationState = remember { mutableStateOf(Location(LocationManager.GPS_PROVIDER)) }
 //            MapScreen()
                 ClimaGuardTheme {
                     val navController = rememberNavController()
@@ -140,25 +156,40 @@ class MainActivity : ComponentActivity() {
                         bottomBar = { BottomNavigationBar(navController) }
                     ) { innerPadding ->
 
+                        val currentLocation by locationState.collectAsState()
                         val graph =
                             navController.createGraph(startDestination = NavigationRoute.Home.route) {
                                 composable(route = NavigationRoute.Maps.route) {
                                     MapScreen(
                                         mapViewModel
-                                        , locationState.value
+                                        , currentLocation
                                     )
                                 }
+                                composable(route = NavigationRoute.FavItem.route) { backStackEntry ->
+                                    val lat = backStackEntry.arguments?.getString("lat")?.toDoubleOrNull() ?: 0.0
+                                    val lon = backStackEntry.arguments?.getString("lon")?.toDoubleOrNull() ?: 0.0
+
+                                    val location = Location("").apply {
+                                        latitude = lat
+                                        longitude = lon
+                                    }
+
+                                    FavItemScreen(homeViewModel, location)
+                                }
                                 composable(route = NavigationRoute.Favorite.route) {
-                                    FavoriteScreen(navController)
+                                    FavoriteScreen(navController,favoriteViewModel)
                                 }
                                 composable(route = NavigationRoute.Setting.route) {
                                     SettingsScreen(navController,settingsViewModel)
                                 }
                                 composable(route = NavigationRoute.Home.route) {
-                                    HomeScreen(
-                                        homeViewModel,
-                                        locationState.value
-                                    )
+                                    if (currentLocation.latitude != 0.0){
+                                        HomeScreen(
+                                            homeViewModel,
+                                            currentLocation
+                                        )
+                                    }
+
                                 }
                                 composable(route = NavigationRoute.Alarm.route) {
                                     ProfileScreen(
@@ -263,21 +294,65 @@ class MainActivity : ComponentActivity() {
                 setMinUpdateIntervalMillis(5000)
             }.build(),
             object : LocationCallback(){
+//                override fun onLocationResult(currentLocation: LocationResult) {
+//                    super.onLocationResult(currentLocation)
+//                    locationState.value = currentLocation.lastLocation?: Location(LocationManager.GPS_PROVIDER)
+//                    Log.i(TAG, "onLocationResult: lat = ${locationState.value.latitude}  long = ${locationState.value.longitude}")
+//                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+//                        geocoder.getFromLocation(locationState.value.latitude,locationState.value.longitude,1, object :
+//                            GeocodeListener {
+//                            override fun onGeocode(addressList: MutableList<Address>) {
+//                                address.value = addressList[0].countryName + ", " + addressList[0].adminArea + ", " + addressList[0].subAdminArea
+//                                Log.d(TAG, "onGeocode: ${address.value}")
+//                            }
+//                        })
+//                    }
+//
+//                }
+//                override fun onLocationResult(currentLocation: LocationResult) {
+//                    super.onLocationResult(currentLocation)
+//
+//                    val newLocation = currentLocation.lastLocation ?: return
+//
+//                    // ✅ التأكد من اختلاف القيم قبل التحديث
+//                    if (newLocation.latitude != _locationState.value.latitude ||
+//                        newLocation.longitude != _locationState.value.longitude) {
+//
+//                        _locationState.value = newLocation
+//                        Log.i(TAG, "Location updated: lat = ${_locationState.value.latitude}, lon = ${_locationState.value.longitude}")
+//                    } else {
+//                        Log.i(TAG, "Same location, no update needed.")
+//                    }
+//                }
                 override fun onLocationResult(currentLocation: LocationResult) {
                     super.onLocationResult(currentLocation)
-                    locationState.value = currentLocation.lastLocation?: Location(LocationManager.GPS_PROVIDER)
-                    Log.i(TAG, "onLocationResult: lat = ${locationState.value.latitude}  long = ${locationState.value.longitude}")
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                        geocoder.getFromLocation(locationState.value.latitude,locationState.value.longitude,1, object :
-                            GeocodeListener {
-                            override fun onGeocode(addressList: MutableList<Address>) {
-                                address.value = addressList[0].countryName + ", " + addressList[0].adminArea + ", " + addressList[0].subAdminArea
-                                Log.d(TAG, "onGeocode: ${address.value}")
-                            }
-                        })
-                    }
 
+                    val newLocation = currentLocation.lastLocation ?: Location(LocationManager.GPS_PROVIDER)
+
+                    //
+                    if (_locationState.value.latitude != newLocation.latitude ||
+                        _locationState.value.longitude != newLocation.longitude) {
+
+                        _locationState.value = newLocation
+
+                        Log.i(TAG, "onLocationResult: lat = ${newLocation.latitude}, long = ${newLocation.longitude}")
+
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                            geocoder.getFromLocation(
+                                newLocation.latitude, newLocation.longitude, 1,
+                                object : GeocodeListener {
+                                    override fun onGeocode(addressList: MutableList<Address>) {
+                                        address.value = addressList[0].countryName + ", " +
+                                                addressList[0].adminArea + ", " +
+                                                addressList[0].subAdminArea
+                                        Log.d(TAG, "onGeocode: ${address.value}")
+                                    }
+                                }
+                            )
+                        }
+                    }
                 }
+
             },
             Looper.myLooper()
         )
