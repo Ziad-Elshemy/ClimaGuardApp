@@ -1,6 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="feels_like">يبدو كأنه</string>
-    <string name="high">"عظمى "</string>
-    <string name="low">" صغرى"</string>
+    <string name="app_name">حارس الطقس</string>
+    <string name="title_activity_main2">النشاط الرئيسي 2</string>
+    <string name="feels_like">تشعر كأنها</string>
+    <string name="high">"أعلى "</string>
+    <string name="low">" أدنى"</string>
+    <string name="failed_to_fetch_data">فشل في جلب البيانات</string>
+    <string name="hourly_forecast">التوقعات لكل ساعة</string>
+    <string name="clouds">الغيوم</string>
+    <string name="pressure">الضغط الجوي</string>
+    <string name="wind_speed">سرعة الرياح</string>
+    <string name="visibility">الرؤية</string>
+    <string name="alt">الارتفاع</string>
+    <string name="_5_day_forecast">توقعات 5 أيام</string>
+    <string name="failed_to_load">فشل في التحميل</string>
+    <string name="humidity">الرطوبة</string>
 </resources>

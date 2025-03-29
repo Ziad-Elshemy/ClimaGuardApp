@@ -65,6 +65,7 @@ class HomeViewModel(private val repo: Repository,
             }
 
         }
+        Log.d(TAG, "getCurrentWeather: ")
     }
 
 
@@ -78,7 +79,6 @@ class HomeViewModel(private val repo: Repository,
                         _toastMessage.emit("Error From API (Forecast) ${ex.message}")
                     }
                     .collect { data ->
-                        _forecastWeather.value = Response.Success(data)
                         _hourlyForecastWeatherList.value = data.list
 
                         val groupedByDay = data.list?.groupBy { it?.dtTxt?.substring(0, 10) ?: "" }
@@ -98,6 +98,7 @@ class HomeViewModel(private val repo: Repository,
                         Log.d(TAG, "getForecastWeather: Processed forecast data: $fiveDaysForecast")
 
                         _fiveDaysForecastWeatherList.value = fiveDaysForecast
+                        _forecastWeather.value = Response.Success(data)
                     }
 
             } catch (ex: Exception) {
@@ -105,6 +106,7 @@ class HomeViewModel(private val repo: Repository,
                 Log.d(TAG, "getForecastWeather: Error catch ${ex.message}")
             }
         }
+        Log.d(TAG, "getForecastWeather: ")
     }
 
     fun updateLocation(lat: Double, lon: Double) {
@@ -113,6 +115,7 @@ class HomeViewModel(private val repo: Repository,
             _lastLocation.value = newLocation
             fetchWeatherData(lat, lon)
         }
+        Log.d(TAG, "updateLocation: ")
     }
 
     fun fetchWeatherData(lat: Double, lon: Double) {
@@ -123,6 +126,7 @@ class HomeViewModel(private val repo: Repository,
 
             getCurrentWeather(lat, lon, tempUnit, language)
             getForecastWeather(lat, lon, tempUnit, language)
+            Log.d(TAG, "fetchWeatherData: ")
         }
 
     }

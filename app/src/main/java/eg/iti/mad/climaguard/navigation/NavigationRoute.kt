@@ -25,6 +25,11 @@ sealed class NavigationRoute(val route: String) {
     object Favorite : NavigationRoute("favorite_screen")
     object Setting : NavigationRoute("setting_screen")
     object Maps : NavigationRoute("maps_screen")
+//    object FavItem : NavigationRoute("fav_item_screen")
+
+    object FavItem : NavigationRoute("fav_item_screen/{lat}/{lon}") {
+        fun createRoute(lat: Double, lon: Double) = "fav_item_screen/$lat/$lon"
+    }
 }
 
 @Composable
@@ -41,7 +46,7 @@ fun BottomNavigationBar(navController: NavController) {
         it.route == currentDestination?.destination?.route
     }.coerceAtLeast(0)
 
-    val shouldShowBottomNav = currentDestination?.destination?.route != NavigationRoute.Maps.route
+    val shouldShowBottomNav = (currentDestination?.destination?.route != NavigationRoute.Maps.route && currentDestination?.destination?.route != NavigationRoute.FavItem.route)
 
     if (shouldShowBottomNav){
         NavigationBar(containerColor = Color.White) {
