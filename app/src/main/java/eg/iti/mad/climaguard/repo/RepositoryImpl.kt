@@ -2,6 +2,7 @@ package eg.iti.mad.climaguard.repo
 
 import eg.iti.mad.climaguard.api.WeatherRemoteDataSource
 import eg.iti.mad.climaguard.local.LocationsLocalDataSource
+import eg.iti.mad.climaguard.model.AlarmEntity
 import eg.iti.mad.climaguard.model.CurrentResponse
 import eg.iti.mad.climaguard.model.ForecastResponse
 import eg.iti.mad.climaguard.model.LocationEntity
@@ -36,6 +37,18 @@ class RepositoryImpl private constructor(
 
     override suspend fun removeLocation(location: LocationEntity): Int {
         return locationsLocalDataSource.deleteLocation(location)
+    }
+
+    override suspend fun getAllAlarms(): Flow<List<AlarmEntity>?> {
+        return locationsLocalDataSource.getAllAlarms()
+    }
+
+    override suspend fun addAlarm(alarm: AlarmEntity): Long {
+        return locationsLocalDataSource.insertAlarm(alarm)
+    }
+
+    override suspend fun removeAlarm(alarm: AlarmEntity): Int {
+        return locationsLocalDataSource.deleteAlarm(alarm)
     }
 
 

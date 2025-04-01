@@ -25,7 +25,7 @@ class FavoriteViewModel(private val repo: Repository) : ViewModel() {
     val message = _message.asSharedFlow()
 
 
-    fun getProducts() {
+    fun getFavorites() {
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 val result = repo.getAllLocations()

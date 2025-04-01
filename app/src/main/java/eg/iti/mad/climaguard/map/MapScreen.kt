@@ -15,15 +15,22 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
+import com.google.gson.Gson
 import com.google.maps.android.compose.*
+import eg.iti.mad.climaguard.model.AlarmEntity
 import eg.iti.mad.climaguard.model.LocationEntity
 import kotlinx.coroutines.launch
 
 @Composable
-fun MapScreen(viewModel: MapViewModel, currentLocation: Location) {
+fun MapScreen(viewModel: MapViewModel,
+              currentLocation: Location,
+              screenType: String,  //receive screen type
+              navController: NavController
+) {
     val searchResults by viewModel.searchResults.collectAsState()
     val searchSuggestions by viewModel.searchSuggestions.collectAsState()
     var searchQuery by remember { mutableStateOf("") }
@@ -52,7 +59,9 @@ fun MapScreen(viewModel: MapViewModel, currentLocation: Location) {
     Scaffold(
         snackbarHost = { SnackbarHost(snackBarHostState) }
     ) { contentPadding ->
-        Box(modifier = Modifier.padding(contentPadding).fillMaxSize()) {
+        Box(modifier = Modifier
+            .padding(contentPadding)
+            .fillMaxSize()) {
             // Google Map
             GoogleMap(
                 modifier = Modifier.fillMaxSize(),
@@ -78,7 +87,7 @@ fun MapScreen(viewModel: MapViewModel, currentLocation: Location) {
 
             val context = LocalContext.current
 
-            // Search Bar فوق الخريطة
+            // Search Bar
             TextField(
                 value = searchQuery,
                 onValueChange = {
@@ -165,14 +174,31 @@ fun MapScreen(viewModel: MapViewModel, currentLocation: Location) {
                         selectedLocation.longitude,
                         context
                     ) { city, country ->
-                        viewModel.addLocationToFav(
-                            LocationEntity(
+                        if (screenType == "favorite") {
+                            // save item to fav
+                            viewModel.addLocationToFav(
+                                LocationEntity(
+                                    name = city,
+                                    country = country,
+                                    lat = selectedLocation.latitude,
+                                    lon = selectedLocation.longitude
+                                )
+                            )
+                        } else if (screenType == "alarm") {
+                            val locationEntity = LocationEntity(
                                 name = city,
                                 country = country,
                                 lat = selectedLocation.latitude,
                                 lon = selectedLocation.longitude
                             )
-                        )
+                            val locationJson = Gson().toJson(locationEntity)
+                            Log.d("MapScreen", "locationJson: $locationJson")
+                            // back to alarm screen with selected location
+                            navController.previousBackStackEntry
+                                ?.savedStateHandle
+                                ?.set("selected_location", locationJson)
+                        }
+                        navController.popBackStack()
                     }
                 },
                 modifier = Modifier
@@ -180,7 +206,10 @@ fun MapScreen(viewModel: MapViewModel, currentLocation: Location) {
                     .align(Alignment.BottomCenter)
                     .padding(16.dp)
             ) {
-                Text(text = "Add Location", fontSize = 16.sp)
+                Text(
+                    text = if (screenType == "favorite") "Add Location" else "Select Location",
+                    fontSize = 16.sp
+                )
             }
         }
 

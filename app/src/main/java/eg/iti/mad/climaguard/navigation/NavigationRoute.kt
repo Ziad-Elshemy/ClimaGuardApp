@@ -24,12 +24,17 @@ sealed class NavigationRoute(val route: String) {
     object Alarm : NavigationRoute("alarm_screen")
     object Favorite : NavigationRoute("favorite_screen")
     object Setting : NavigationRoute("setting_screen")
-    object Maps : NavigationRoute("maps_screen")
+//    object Maps : NavigationRoute("maps_screen")
 //    object FavItem : NavigationRoute("fav_item_screen")
 
     object FavItem : NavigationRoute("fav_item_screen/{lat}/{lon}") {
         fun createRoute(lat: Double, lon: Double) = "fav_item_screen/$lat/$lon"
     }
+
+    object Maps : NavigationRoute("maps_screen/{screenType}") {
+        fun createRoute(screenType: String) = "maps_screen/$screenType"
+    }
+
 }
 
 @Composable

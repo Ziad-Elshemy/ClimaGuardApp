@@ -19,6 +19,7 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
@@ -27,7 +28,6 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
@@ -46,6 +46,9 @@ import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
+import eg.iti.mad.climaguard.alarm.AlarmFactory
+import eg.iti.mad.climaguard.alarm.AlarmScreen
+import eg.iti.mad.climaguard.alarm.AlarmViewModel
 import eg.iti.mad.climaguard.api.WeatherRemoteDataSourceImpl
 import eg.iti.mad.climaguard.favitemscreen.FavItemScreen
 import eg.iti.mad.climaguard.favorite.FavoriteFactory
@@ -61,7 +64,6 @@ import eg.iti.mad.climaguard.local.LocationsLocalDataSourceImpl
 import eg.iti.mad.climaguard.local.MyDatabase
 import eg.iti.mad.climaguard.navigation.BottomNavigationBar
 import eg.iti.mad.climaguard.navigation.NavigationRoute
-import eg.iti.mad.climaguard.profile.ProfileScreen
 import eg.iti.mad.climaguard.repo.Repository
 import eg.iti.mad.climaguard.repo.RepositoryImpl
 import eg.iti.mad.climaguard.settings.SettingsDataStore
@@ -90,6 +92,7 @@ class MainActivity : ComponentActivity() {
     val locationState: StateFlow<Location> = _locationState.asStateFlow()
 
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -106,7 +109,8 @@ class MainActivity : ComponentActivity() {
             WeatherRemoteDataSourceImpl(
                 ApiManager.getApis()
             ),LocationsLocalDataSourceImpl(
-                MyDatabase.getInstance(this@MainActivity).locationDao()
+                MyDatabase.getInstance(this@MainActivity).locationDao(),
+                MyDatabase.getInstance(this@MainActivity).alarmDao()
             )
         )
 
@@ -118,6 +122,13 @@ class MainActivity : ComponentActivity() {
             )
 
         ).get(HomeViewModel::class.java)
+
+        val alarmViewModel = ViewModelProvider(
+            this@MainActivity,
+            factory = AlarmFactory(
+                repo
+            )
+        ).get(AlarmViewModel::class.java)
 
         val favoriteViewModel = ViewModelProvider(
             this,
@@ -139,6 +150,14 @@ class MainActivity : ComponentActivity() {
         ).get(SettingsViewModel::class.java)
 
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(android.Manifest.permission.POST_NOTIFICATIONS),
+                101
+            )
+        }
+
         setContent {
 
             val language = runBlocking { settingsDataStore.language.first() }
@@ -159,10 +178,13 @@ class MainActivity : ComponentActivity() {
                         val currentLocation by locationState.collectAsState()
                         val graph =
                             navController.createGraph(startDestination = NavigationRoute.Home.route) {
-                                composable(route = NavigationRoute.Maps.route) {
+                                composable(route = NavigationRoute.Maps.route) { backStackEntry ->
+                                    val screenType = backStackEntry.arguments?.getString("screenType")?:"favorite"
                                     MapScreen(
                                         mapViewModel
-                                        , currentLocation
+                                        , currentLocation,
+                                        screenType = screenType,
+                                        navController
                                     )
                                 }
                                 composable(route = NavigationRoute.FavItem.route) { backStackEntry ->
@@ -192,8 +214,9 @@ class MainActivity : ComponentActivity() {
 
                                 }
                                 composable(route = NavigationRoute.Alarm.route) {
-                                    ProfileScreen(
-                                        homeViewModel
+                                    AlarmScreen(
+                                        navController,
+                                        alarmViewModel
                                     )
                                 }
                             }

@@ -1,7 +1,6 @@
 package eg.iti.mad.climaguard.favorite
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -20,8 +19,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FloatingActionButton
@@ -38,9 +35,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.composed
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -58,7 +53,7 @@ import eg.iti.mad.climaguard.navigation.NavigationRoute
 fun FavoriteScreen(navController: NavController, viewModel: FavoriteViewModel) {
 //    val favoritePlaces by viewModel.favoritePlaces.collectAsState(initial = emptyList())
 
-    viewModel.getProducts()
+    viewModel.getFavorites()
 
     val uiState by viewModel.locationsList.collectAsStateWithLifecycle()
 
@@ -68,7 +63,7 @@ fun FavoriteScreen(navController: NavController, viewModel: FavoriteViewModel) {
 
         floatingActionButton = {
             FloatingActionButton(onClick = {
-                navController.navigate(NavigationRoute.Maps.route)
+                navController.navigate(NavigationRoute.Maps.createRoute("favorite"))
             }) {
                 Icon(imageVector = Icons.Default.LocationOn, contentDescription = "Open Map")
             }
