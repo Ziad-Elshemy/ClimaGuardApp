@@ -10,33 +10,39 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.graphics.Color
 
+// Dark theme colors
 private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+    primary = Color(0xFF6200EE), // Purple
+    secondary = Color(0xFF03DAC6), // Teal
+    tertiary = Color(0xFFFF4081), // Pink
+    background = Color(0xFF121212), // Dark background
+    surface = Color(0xFF1E1E1E), // Dark surface
+    onPrimary = Color.White, // Text on primary
+    onSecondary = Color.Black, // Text on secondary
+    onTertiary = Color.White, // Text on tertiary
+    onBackground = Color.White, // Text on background
+    onSurface = Color.White // Text on surface
 )
 
+// Light theme colors
 private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
-
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+    primary = Color(0xFF284486), // Purple
+    secondary = Color(0xFF665B57), // Teal
+    tertiary = Color(0xFFFF4081), // Pink
+    background = Color(0xFFEEEEEE), // Light background
+    surface = Color(0xFFFFFFFF), // Light surface
+    onPrimary = Color.White, // Text on primary
+    onSecondary = Color.Black, // Text on secondary
+    onTertiary = Color.Black, // Text on tertiary
+    onBackground = Color.Black, // Text on background
+    onSurface = Color.Black // Text on surface
 )
 
 @Composable
 fun ClimaGuardTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
     dynamicColor: Boolean = true,
     content: @Composable () -> Unit
 ) {

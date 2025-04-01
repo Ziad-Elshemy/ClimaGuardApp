@@ -19,9 +19,11 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import eg.iti.mad.climaguard.R
 
 @Composable
 fun SettingsScreen(navController: NavController, viewModel: SettingsViewModel) {
@@ -45,44 +47,44 @@ fun SettingsScreen(navController: NavController, viewModel: SettingsViewModel) {
                 .padding(16.dp)
         ) {
             Text(
-                text = "Settings",
+                text = stringResource(R.string.settings),
                 style = MaterialTheme.typography.headlineMedium,
                 modifier = Modifier.padding(bottom = 16.dp)
             )
 
             // Location Selection
-            SectionTitle("Location", Icons.Default.LocationOn)
+            SectionTitle(stringResource(R.string.location), Icons.Default.LocationOn)
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
                 RadioButton(
                     selected = isGpsEnabled,
                     onClick = { viewModel.saveSettings(true, selectedTemperatureUnit, selectedWindSpeedUnit, selectedLanguage) }
                 )
-                Text(text = "Use GPS", modifier = Modifier.padding(start = 8.dp))
+                Text(text = stringResource(R.string.use_gps), modifier = Modifier.padding(start = 8.dp))
                 Spacer(modifier = Modifier.weight(1f))
                 RadioButton(
                     selected = !isGpsEnabled,
                     onClick = { viewModel.saveSettings(false, selectedTemperatureUnit, selectedWindSpeedUnit, selectedLanguage) }
                 )
-                Text(text = "Pick from Map", modifier = Modifier.padding(start = 8.dp))
+                Text(text = stringResource(R.string.pick_from_map), modifier = Modifier.padding(start = 8.dp))
             }
             Divider(modifier = Modifier.padding(vertical = 12.dp))
 
             // Temperature Unit Selection
-            SectionTitle("Temperature Unit", Icons.Default.Thermostat)
+            SectionTitle(stringResource(R.string.temperature_unit), Icons.Default.Thermostat)
             TemperatureUnitDropdown(selectedTemperatureUnit) { newUnit ->
                 viewModel.saveSettings(isGpsEnabled, newUnit, if (newUnit == "imperial") "miles/hour" else "meter/sec", selectedLanguage)
             }
             Divider(modifier = Modifier.padding(vertical = 12.dp))
 
             // Wind Speed Unit Selection
-            SectionTitle("Wind Speed Unit", Icons.Default.Speed)
+            SectionTitle(stringResource(R.string.wind_speed_unit), Icons.Default.Speed)
             WindSpeedUnitDropdown(selectedWindSpeedUnit) { newUnit ->
                 viewModel.saveSettings(isGpsEnabled, if (newUnit == "miles/hour") "imperial" else "metric", newUnit, selectedLanguage)
             }
             Divider(modifier = Modifier.padding(vertical = 12.dp))
 
             // Language Selection
-            SectionTitle("Language", Icons.Default.Language)
+            SectionTitle(stringResource(R.string.language), Icons.Default.Language)
             LanguageDropdown(selectedLanguage) {
                 viewModel.saveSettings(isGpsEnabled, selectedTemperatureUnit, selectedWindSpeedUnit, it)
             }
@@ -99,9 +101,11 @@ fun SettingsScreen(navController: NavController, viewModel: SettingsViewModel) {
                     activity?.finish()
                     activity?.startActivity(intent)
                 },
-                modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(8.dp))
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(8.dp))
             ) {
-                Text(text = "Save Settings", fontSize = 18.sp)
+                Text(text = stringResource(R.string.save_settings), fontSize = 18.sp)
             }
         }
     }
@@ -126,7 +130,9 @@ fun TemperatureUnitDropdown(selectedUnit: String, onUnitSelected: (String) -> Un
 
     var expanded by remember { mutableStateOf(false) }
 
-    Box(modifier = Modifier.fillMaxWidth().clickable { expanded = true }) {
+    Box(modifier = Modifier
+        .fillMaxWidth()
+        .clickable { expanded = true }) {
         Text(text = units.find { apiUnits[it] == selectedUnit } ?: "Celsius", modifier = Modifier.padding(12.dp))
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             units.forEach { unit ->
@@ -145,7 +151,9 @@ fun WindSpeedUnitDropdown(selectedUnit: String, onUnitSelected: (String) -> Unit
 
     var expanded by remember { mutableStateOf(false) }
 
-    Box(modifier = Modifier.fillMaxWidth().clickable { expanded = true }) {
+    Box(modifier = Modifier
+        .fillMaxWidth()
+        .clickable { expanded = true }) {
         Text(text = selectedUnit, modifier = Modifier.padding(12.dp))
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             windUnits.forEach { unit ->

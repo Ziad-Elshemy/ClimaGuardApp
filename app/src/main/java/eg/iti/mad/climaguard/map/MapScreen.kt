@@ -13,6 +13,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -21,6 +22,7 @@ import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.gson.Gson
 import com.google.maps.android.compose.*
+import eg.iti.mad.climaguard.R
 import eg.iti.mad.climaguard.model.AlarmEntity
 import eg.iti.mad.climaguard.model.LocationEntity
 import kotlinx.coroutines.launch
@@ -99,7 +101,7 @@ fun MapScreen(viewModel: MapViewModel,
                     .fillMaxWidth(0.9f)
                     .align(Alignment.TopCenter)
                     .padding(16.dp),
-                placeholder = { Text("Search for a place...") }
+                placeholder = { Text(stringResource(R.string.search_for_a_place)) }
             )
 
             // Search Results List
@@ -207,7 +209,9 @@ fun MapScreen(viewModel: MapViewModel,
                     .padding(16.dp)
             ) {
                 Text(
-                    text = if (screenType == "favorite") "Add Location" else "Select Location",
+                    text = if (screenType == "favorite") stringResource(R.string.add_location) else stringResource(
+                        R.string.select_location
+                    ),
                     fontSize = 16.sp
                 )
             }

@@ -15,4 +15,27 @@
     <string name="_5_day_forecast">توقعات 5 أيام</string>
     <string name="failed_to_load">فشل في التحميل</string>
     <string name="humidity">الرطوبة</string>
+    <string name="home">الرئيسية</string>
+    <string name="alarm">المنبه</string>
+    <string name="favorite">المفضلة</string>
+    <string name="setting">الإعدادات</string>
+    <string name="settings">الإعدادات</string>
+    <string name="location">الموقع</string>
+    <string name="use_gps">استخدام GPS</string>
+    <string name="pick_from_map">اختيار من الخريطة</string>
+    <string name="temperature_unit">وحدة الحرارة</string>
+    <string name="wind_speed_unit">وحدة سرعة الرياح</string>
+    <string name="language">اللغة</string>
+    <string name="save_settings">حفظ الإعدادات</string>
+    <string name="search_for_a_place">البحث عن مكان...</string>
+    <string name="add_location">إضافة موقع</string>
+    <string name="select_location">اختيار الموقع</string>
+    <string name="select_date">اختر التاريخ: %1$s</string>
+    <string name="select_time">اختر الوقت: %1$s</string>
+    <string name="notification">إشعار</string>
+    <string name="alarm_type">منبه</string>
+    <string name="save">حفظ</string>
+    <string name="cancel">إلغاء</string>
+
+
 </resources>

@@ -40,6 +40,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 
 import androidx.compose.ui.unit.dp
@@ -49,6 +50,7 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.workDataOf
 import com.google.gson.Gson
+import eg.iti.mad.climaguard.R
 import eg.iti.mad.climaguard.model.AlarmEntity
 
 import eg.iti.mad.climaguard.model.LocationEntity
@@ -133,9 +135,9 @@ fun AlarmSettingsBottomSheet(
     var selectedTime by remember { mutableStateOf(LocalTime.now()) }
     var showDatePicker by remember { mutableStateOf(false) }
     var showTimePicker by remember { mutableStateOf(false) }
-    var notificationType by remember { mutableStateOf("Notification") } // تحديد نوع الإشعار
+    var notificationType by remember { mutableStateOf("Notification") }
 
-    val context = LocalContext.current // جلب الـ context مرة واحدة بدل استدعائه لاحقًا
+    val context = LocalContext.current
 
 
     ModalBottomSheet(
@@ -149,9 +151,9 @@ fun AlarmSettingsBottomSheet(
         ) {
             Text("Set Alarm for ${location.name}", fontWeight = FontWeight.Bold)
 
-            // زر اختيار التاريخ
+            // date picker button
             Button(onClick = { showDatePicker = true }) {
-                Text("Select Date: $selectedDate")
+                Text(stringResource(R.string.select_date, selectedDate))
             }
             if (showDatePicker) {
                 DatePickerDialog(
@@ -164,9 +166,9 @@ fun AlarmSettingsBottomSheet(
                 )
             }
 
-            // زر اختيار الوقت
+            // time picker button
             Button(onClick = { showTimePicker = true }) {
-                Text("Select Time: $selectedTime")
+                Text(stringResource(R.string.select_time, selectedTime))
             }
             if (showTimePicker) {
                 TimePickerDialog(
@@ -179,13 +181,13 @@ fun AlarmSettingsBottomSheet(
                 )
             }
 
-            // اختيار نوع الإشعار (Notification أو Alarm)
+            // select type (Notification or Alarm)
             Row(verticalAlignment = Alignment.CenterVertically) {
                 RadioButton(
                     selected = notificationType == "Notification",
                     onClick = { notificationType = "Notification" }
                 )
-                Text("Notification", modifier = Modifier.padding(start = 4.dp))
+                Text(stringResource(R.string.notification), modifier = Modifier.padding(start = 4.dp))
 
                 Spacer(modifier = Modifier.width(16.dp))
 
@@ -193,10 +195,10 @@ fun AlarmSettingsBottomSheet(
                     selected = notificationType == "Alarm",
                     onClick = { notificationType = "Alarm" }
                 )
-                Text("Alarm", modifier = Modifier.padding(start = 4.dp))
+                Text(stringResource(R.string.alarm_type), modifier = Modifier.padding(start = 4.dp))
             }
 
-            // زر الحفظ
+            // save button
             Button(onClick = {
                 val dateTime = selectedDate.atTime(selectedTime)
                 val dateTimeInMillis = dateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
@@ -218,12 +220,12 @@ fun AlarmSettingsBottomSheet(
                 )
                 onSave(alarmEntity)
             }) {
-                Text("Save")
+                Text(stringResource(R.string.save))
             }
 
-            // زر الإلغاء
+            // cancel button
             OutlinedButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(stringResource(R.string.cancel))
             }
         }
     }
