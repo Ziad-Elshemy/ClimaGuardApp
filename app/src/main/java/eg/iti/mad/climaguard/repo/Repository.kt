@@ -24,5 +24,6 @@ interface Repository {
     suspend fun addAlarm(alarm: AlarmEntity): Long
     suspend fun removeAlarm(alarm: AlarmEntity): Int
     suspend fun removeAlarmById(alarmId: Long): Int
+    suspend fun removeAlarmByUUId(uuId: String): Int
 
 }

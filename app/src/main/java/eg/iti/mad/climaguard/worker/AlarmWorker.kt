@@ -1,10 +1,14 @@
 package eg.iti.mad.climaguard.worker
 
+import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.media.AudioAttributes
 import android.media.MediaPlayer
+import android.net.Uri
 import android.os.Build
 import android.util.Log
 import androidx.core.app.NotificationCompat
@@ -12,6 +16,7 @@ import androidx.work.CoroutineWorker
 import androidx.work.Worker
 import androidx.work.WorkerParameters
 import com.example.newsapp.api.ApiManager
+import eg.iti.mad.climaguard.MainActivity
 import eg.iti.mad.climaguard.R
 import eg.iti.mad.climaguard.api.WeatherRemoteDataSourceImpl
 import eg.iti.mad.climaguard.local.LocationsLocalDataSourceImpl
@@ -19,6 +24,8 @@ import eg.iti.mad.climaguard.local.MyDatabase
 import eg.iti.mad.climaguard.notification.NotificationActivity
 import eg.iti.mad.climaguard.repo.Repository
 import eg.iti.mad.climaguard.repo.RepositoryImpl
+import eg.iti.mad.climaguard.settings.SettingsDataStore
+import eg.iti.mad.climaguard.utils.Constants
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import java.net.UnknownHostException
@@ -46,16 +53,20 @@ class AlarmWorker(context: Context, workerParams: WorkerParameters) : CoroutineW
                     MyDatabase.getInstance(applicationContext).alarmDao()
                 )
             )
+            val settingsDataStore = SettingsDataStore(applicationContext)
+            val language = settingsDataStore.language.first()
+            val tempUnit = settingsDataStore.tempUnit.first()
 
             //
-            val weatherResponse = repo.getCurrentWeather(lat, lon, "metric", "en").first()
+            val weatherResponse = repo.getCurrentWeather(lat, lon, tempUnit, language).first()
             val cityName = weatherResponse.name
             val weatherDescription = weatherResponse.weather?.firstOrNull()?.description ?: "Unknown weather"
 
-            val updatedMessage = "Weather in $cityName: $weatherDescription"
+            val updatedMessage =
+                applicationContext.getString(R.string.weather_in, cityName, weatherDescription)
 
             if (type == "Notification") {
-                showNotification(applicationContext, title, updatedMessage)
+                showNotification(applicationContext, title, updatedMessage,dateTime, lat,lon)
             } else {
                 playAlarm(applicationContext, cityName ?: "Unknown City", weatherDescription, dateTime)
             }
@@ -72,24 +83,66 @@ class AlarmWorker(context: Context, workerParams: WorkerParameters) : CoroutineW
         }
     }
 
-    private fun showNotification(context: Context, title: String, message: String) {
-        val channelId = "alarm_channel"
+    private fun showNotification(context: Context, title: String, message: String, dateTime: Long, lat: Double, lon: Double) {
+        val channelId = Constants.CHANNEL_ID
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(channelId, "Alarms", NotificationManager.IMPORTANCE_HIGH)
+//            val soundUri = Uri.parse("android.resource://${context.packageName}/raw/alarm")
+//            val audioAttributes = AudioAttributes.Builder()
+//                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+//                .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+//                .build()
+            val channel = NotificationChannel(channelId, "Alarms", NotificationManager.IMPORTANCE_HIGH).apply {
+                this.description = "ClimaGuard"
+                enableVibration(true)
+                setSound(null, null)
+                lockscreenVisibility = Notification.VISIBILITY_PUBLIC
+
+            }
             notificationManager.createNotificationChannel(channel)
         }
+
+        val notificationId = dateTime.hashCode()
+
+        val intent = Intent(context, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            putExtra("TARGET_SCREEN", "home")
+            putExtra("LAT", lat)
+            putExtra("LON", lon)
+            putExtra("DATE_TIME", dateTime)
+            putExtra("NOTIFICATION_ID", notificationId)
+        }
+        val pendingIntent: PendingIntent = PendingIntent.getActivity(
+            context, notificationId, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val soundServiceIntent = Intent(context, SoundService::class.java)
+        context.startService(soundServiceIntent)
+
+        val dismissIntent = Intent(context, DismissReceiver::class.java).apply {
+            putExtra("DATE_TIME", dateTime)
+            putExtra("NOTIFICATION_ID", notificationId)
+        }
+        val dismissPendingIntent: PendingIntent = PendingIntent.getBroadcast(
+            context, 0, dismissIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
 
         val notification = NotificationCompat.Builder(context, channelId)
             .setSmallIcon(R.drawable.clock)
             .setContentTitle(title)
             .setContentText(message)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setCategory(NotificationCompat.CATEGORY_ALARM)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setAutoCancel(true)
+            .setContentIntent(pendingIntent)
+            .setFullScreenIntent(pendingIntent, true)
+            .setSound(null)
+            .addAction(R.drawable.ic_humidity, "Dismiss", dismissPendingIntent)
             .build()
 
-        notificationManager.notify(0, notification)
+        notificationManager.notify(notificationId, notification)
     }
 
     private fun playAlarm(context: Context, cityName: String, weatherDescription: String, dateTime: Long) {

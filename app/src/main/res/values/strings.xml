@@ -4,6 +4,8 @@
     <string name="feels_like">Feels like</string>
     <string name="high">"High "</string>
     <string name="low">" Low"</string>
+    <string name="sunrise">"Sunrise "</string>
+    <string name="sunset">" Sunset"</string>
     <string name="failed_to_fetch_data">Failed to fetch data</string>
     <string name="hourly_forecast">Hourly forecast</string>
     <string name="clouds">Clouds</string>
@@ -35,4 +37,6 @@
     <string name="alarm_type">Alarm</string>
     <string name="save">Save</string>
     <string name="cancel">Cancel</string>
+    <string name="weather_in">Weather in %1$s: %2$s</string>
+    <string name="dismiss_alarm">Dismiss Alarm</string>
 </resources>

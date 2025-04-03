@@ -5,6 +5,8 @@
     <string name="feels_like">تشعر كأنها</string>
     <string name="high">"أعلى "</string>
     <string name="low">" أدنى"</string>
+    <string name="sunrise">"الشروق "</string>
+    <string name="sunset">" الغروب"</string>
     <string name="failed_to_fetch_data">فشل في جلب البيانات</string>
     <string name="hourly_forecast">التوقعات لكل ساعة</string>
     <string name="clouds">الغيوم</string>
@@ -36,6 +38,8 @@
     <string name="alarm_type">منبه</string>
     <string name="save">حفظ</string>
     <string name="cancel">إلغاء</string>
+    <string name="weather_in">الطقس في %1$s: %2$s</string>
+    <string name="dismiss_alarm">إيقاف المنبه</string>
 
 
 </resources>

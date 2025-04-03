@@ -33,4 +33,8 @@ class LocationsLocalDataSourceImpl(private val dao: LocationDao, private val ala
         return alarmsDao.deleteAlarmById(alarmId)
     }
 
+    override suspend fun deleteAlarmByUUId(uuId: String): Int {
+        return alarmsDao.deleteAlarmByUUId(uuId)
+    }
+
 }

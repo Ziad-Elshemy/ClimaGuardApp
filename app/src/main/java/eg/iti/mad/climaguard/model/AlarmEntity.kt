@@ -8,6 +8,7 @@ import java.time.LocalDateTime
 data class AlarmEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
+    val uuid: String,
     val locationName: String,
     val latitude: Double,
     val longitude: Double,

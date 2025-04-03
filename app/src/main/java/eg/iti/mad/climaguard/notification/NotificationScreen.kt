@@ -20,7 +20,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import eg.iti.mad.climaguard.R
 import kotlinx.coroutines.delay
 
 
@@ -67,7 +69,7 @@ fun NotificationScreen(cityName: String, weatherDesc: String, onDismiss: () -> U
                     colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text(text = "Dismiss Alarm", color = Color.White, fontSize = 16.sp)
+                    Text(text = stringResource(R.string.dismiss_alarm), color = Color.White, fontSize = 16.sp)
                 }
             }
         }

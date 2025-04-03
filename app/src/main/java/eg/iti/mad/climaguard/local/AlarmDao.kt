@@ -23,4 +23,7 @@ interface AlarmDao {
     @Query("DELETE FROM alarms WHERE dateTime = :alarmId")
     suspend fun deleteAlarmById(alarmId: Long): Int
 
+    @Query("DELETE FROM alarms WHERE uuid = :uuId")
+    suspend fun deleteAlarmByUUId(uuId: String): Int
+
 }
