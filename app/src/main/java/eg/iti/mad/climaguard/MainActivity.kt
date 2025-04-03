@@ -74,6 +74,7 @@ import eg.iti.mad.climaguard.settings.SettingsScreen
 import eg.iti.mad.climaguard.settings.SettingsViewModel
 import eg.iti.mad.climaguard.ui.theme.ClimaGuardTheme
 import eg.iti.mad.climaguard.utils.Utility.Companion.setAppLocale
+import eg.iti.mad.climaguard.worker.SoundService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -189,6 +190,8 @@ class MainActivity : ComponentActivity() {
                         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
                         notificationManager.cancel(notificationId)
                     }
+
+                    stopService(Intent(this@MainActivity, SoundService::class.java))
 
                 }
             }

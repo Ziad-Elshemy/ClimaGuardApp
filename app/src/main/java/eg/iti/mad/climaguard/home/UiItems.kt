@@ -26,8 +26,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.NightsStay
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material.icons.filled.Today
+import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -219,6 +221,53 @@ fun WeatherScreenUi(
                 } + "°",
                 color = Color(0xFF2A2A2A),
                 fontSize = 16.sp
+            )
+        }
+
+        // sunrise $ sunset
+        Row (verticalAlignment = Alignment.CenterVertically){
+            Icon(
+                imageVector = Icons.Default.WbSunny,
+                contentDescription = null,
+                tint = Color.Yellow,
+                modifier = Modifier
+                    .size(22.dp)
+                    .padding(end = 4.dp)
+            )
+            Text(
+                stringResource(R.string.sunrise),
+                color = Color(0xFF2A2A2A),
+                fontSize = 16.sp
+            )
+            val (sunriseDate, sunriseTime) = Utility.formatTimestamp(responseData.sys?.sunrise?.times(1000L) ?: 0)
+            Text(
+                text = " $sunriseTime",
+                fontSize = 16.sp,
+                color = Color(0xFF2A2A2A)
+            )
+            Text(
+                " • ",
+                color = Color(0xFF2A2A2A),
+                fontSize = 16.sp
+            )
+            Icon(
+                imageVector = Icons.Default.NightsStay,
+                contentDescription = null,
+                tint = Color(0xFF1A5180),
+                modifier = Modifier
+                    .size(22.dp)
+                    .padding(end = 4.dp)
+            )
+            Text(
+                stringResource(R.string.sunset),
+                color = Color(0xFF2A2A2A),
+                fontSize = 16.sp
+            )
+            val (date, time) = Utility.formatTimestamp(responseData.sys?.sunset?.times(1000L) ?: 0)
+            Text(
+                text = " $time",
+                fontSize = 16.sp,
+                color = Color(0xFF2A2A2A)
             )
         }
 
