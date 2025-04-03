@@ -55,6 +55,10 @@ class RepositoryImpl private constructor(
         return locationsLocalDataSource.deleteAlarmById(alarmId)
     }
 
+    override suspend fun removeAlarmByUUId(uuId: String): Int {
+        return locationsLocalDataSource.deleteAlarmByUUId(uuId)
+    }
+
 
     companion object {
         private var INSTANCE: RepositoryImpl? = null
