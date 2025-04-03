@@ -61,6 +61,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 import androidx.navigation.NavController
 import androidx.work.BackoffPolicy
@@ -148,9 +149,15 @@ fun AlarmScreen(navController: NavController, viewModel: AlarmViewModel) {
                         items((uiState as Response.Success).data){ alarm ->
                             AlarmItem(alarm = alarm,navController,
                                 onDeleteFromAlarmClicked = {
-                                    val uuid = UUID.fromString(alarm.uuid)
-                                    viewModel.deleteAlarm(alarm)
-                                    cancelAlarmWorker(context,uuid)
+                                    try {
+                                        val uuid = UUID.fromString(alarm.uuid)
+                                        viewModel.deleteAlarm(alarm)
+                                        cancelAlarmWorker(context,uuid)
+                                    }catch (ex:Exception){
+                                        Log.e("onDeleteFromAlarmClicked","Invalid UUID")
+                                        viewModel.deleteAlarmById(alarm.dateTime)
+                                    }
+
                                 })
                         }
 
@@ -184,6 +191,7 @@ fun AlarmScreen(navController: NavController, viewModel: AlarmViewModel) {
     if (showBottomSheet) {
         Log.d("AlarmScreen", "AlarmScreen: showBottomSheet")
         AlarmSettingsBottomSheet(
+            viewModel = viewModel,
             location = selectedLocation!!,
             onDismiss = { showBottomSheet = false },
             onSave = { alarmEntity ->
@@ -278,6 +286,7 @@ fun cancelAlarmWorker(context: Context, workId: UUID) {
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun AlarmSettingsBottomSheet(
+    viewModel: AlarmViewModel,
     location: LocationEntity,
     onDismiss: () -> Unit,
     onSave: (AlarmEntity) -> Unit
@@ -356,11 +365,11 @@ fun AlarmSettingsBottomSheet(
                 val currentTime = System.currentTimeMillis()
                 val delay = dateTimeInMillis - currentTime
 
-                Log.d("DEBUG", "Alarm scheduled after $delay ms")
+                Log.i("DEBUG", "Alarm scheduled after $delay ms")
 
                 var workId = ""
                 if (delay > 0) {
-                    val uuid = scheduleAlarmWorker(context,dateTimeInMillis, location.name, "Your alarm is set!", notificationType, delay,location.lat,location.lon)
+                    val uuid = viewModel.scheduleAlarmWorker(context,dateTimeInMillis, location.name, "Your alarm is set!", notificationType, delay,location.lat,location.lon)
                     workId = uuid.toString()
                 }
 
@@ -384,45 +393,4 @@ fun AlarmSettingsBottomSheet(
         }
     }
 }
-
-fun scheduleAlarmWorker(
-    context: Context,
-    dateTime: Long,
-    title: String,
-    message: String,
-    type: String,
-    delay: Long,
-    lat: Double,
-    lon: Double
-):UUID {
-    val data = workDataOf(
-        "DATE_TIME" to dateTime,
-        "TITLE" to title,
-        "MESSAGE" to message,
-        "TYPE" to type,
-        "LAT" to lat,
-        "LON" to lon
-    )
-
-    val constraints = Constraints.Builder()
-        .setRequiredNetworkType(NetworkType.CONNECTED)
-        .build()
-
-    val alarmRequest = OneTimeWorkRequestBuilder<AlarmWorker>()
-        .setInitialDelay(delay, TimeUnit.MILLISECONDS)
-        .setInputData(data)
-        .setBackoffCriteria(
-            BackoffPolicy.LINEAR,5,TimeUnit.SECONDS
-        )
-        .setConstraints(constraints)
-        .build()
-
-    WorkManager.getInstance(context).enqueue(alarmRequest)
-    return alarmRequest.id
-}
-
-
-
-
-
 

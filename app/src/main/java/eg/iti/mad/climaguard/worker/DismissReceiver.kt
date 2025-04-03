@@ -34,9 +34,10 @@ class DismissReceiver : BroadcastReceiver() {
             CoroutineScope(Dispatchers.IO).launch {
                 repo.removeAlarmById(dateTime)
             }
-
             val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.cancel(notificationId)
+
+            context.stopService(Intent(context, SoundService::class.java))
 
             Log.d("DismissReceiver", "Dismiss action triggered, item deleted from database.")
         }

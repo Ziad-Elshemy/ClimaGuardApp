@@ -3,6 +3,7 @@ package eg.iti.mad.climaguard
 import android.Manifest.permission.ACCESS_COARSE_LOCATION
 import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.annotation.SuppressLint
+import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -24,6 +25,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -72,6 +74,8 @@ import eg.iti.mad.climaguard.settings.SettingsScreen
 import eg.iti.mad.climaguard.settings.SettingsViewModel
 import eg.iti.mad.climaguard.ui.theme.ClimaGuardTheme
 import eg.iti.mad.climaguard.utils.Utility.Companion.setAppLocale
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -160,6 +164,35 @@ class MainActivity : ComponentActivity() {
 
         setContent {
 
+            val navController = rememberNavController()
+
+            val targetScreen = intent?.getStringExtra("TARGET_SCREEN")
+            val notificationId = intent?.getIntExtra("NOTIFICATION_ID", -1)
+            val dateTime = intent?.getLongExtra("DATE_TIME", -1)
+            val lat = intent?.getDoubleExtra("LAT",30.0)
+            val lon = intent?.getDoubleExtra("LON",29.0)
+
+            LaunchedEffect(targetScreen) {
+                if (targetScreen != null && targetScreen == "home") {
+                    if (lat != null && lon !=null) {
+                        navController.navigate(NavigationRoute.FavItem.createRoute(lat, lon))
+                    }
+                    // delete notification from database
+                    if (dateTime != null && dateTime != -1L) {
+                        CoroutineScope(Dispatchers.IO).launch {
+                            repo.removeAlarmById(dateTime)
+                        }
+                    }
+
+                    // delete notification from app bar
+                    if (notificationId != null && notificationId != -1) {
+                        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                        notificationManager.cancel(notificationId)
+                    }
+
+                }
+            }
+
             val language = runBlocking { settingsDataStore.language.first() }
             val layoutDirection = if (language == "ar") LayoutDirection.Rtl else LayoutDirection.Ltr
 
@@ -167,7 +200,7 @@ class MainActivity : ComponentActivity() {
 //                locationState = remember { mutableStateOf(Location(LocationManager.GPS_PROVIDER)) }
 //            MapScreen()
                 ClimaGuardTheme {
-                    val navController = rememberNavController()
+//                    val navController = rememberNavController()
 
                     Scaffold(
                         modifier = Modifier
