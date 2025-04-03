@@ -2,6 +2,7 @@ package eg.iti.mad.climaguard.worker
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.media.MediaPlayer
@@ -55,7 +56,7 @@ class AlarmWorker(context: Context, workerParams: WorkerParameters) : CoroutineW
             val updatedMessage = "Weather in $cityName: $weatherDescription"
 
             if (type == "Notification") {
-                showNotification(applicationContext, title, updatedMessage)
+                showNotification(applicationContext, title, updatedMessage,dateTime)
             } else {
                 playAlarm(applicationContext, cityName ?: "Unknown City", weatherDescription, dateTime)
             }
@@ -72,7 +73,7 @@ class AlarmWorker(context: Context, workerParams: WorkerParameters) : CoroutineW
         }
     }
 
-    private fun showNotification(context: Context, title: String, message: String) {
+    private fun showNotification(context: Context, title: String, message: String, dateTime: Long) {
         val channelId = "alarm_channel"
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
@@ -81,15 +82,26 @@ class AlarmWorker(context: Context, workerParams: WorkerParameters) : CoroutineW
             notificationManager.createNotificationChannel(channel)
         }
 
+        val notificationId = dateTime.hashCode()
+
+        val dismissIntent = Intent(context, DismissReceiver::class.java).apply {
+            putExtra("DATE_TIME", dateTime)
+            putExtra("NOTIFICATION_ID", notificationId)
+        }
+        val dismissPendingIntent: PendingIntent = PendingIntent.getBroadcast(
+            context, 0, dismissIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
         val notification = NotificationCompat.Builder(context, channelId)
             .setSmallIcon(R.drawable.clock)
             .setContentTitle(title)
             .setContentText(message)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
+            .addAction(R.drawable.ic_humidity, "Dismiss", dismissPendingIntent)
             .build()
 
-        notificationManager.notify(0, notification)
+        notificationManager.notify(notificationId, notification)
     }
 
     private fun playAlarm(context: Context, cityName: String, weatherDescription: String, dateTime: Long) {
