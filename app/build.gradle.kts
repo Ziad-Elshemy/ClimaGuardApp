@@ -94,5 +94,8 @@ dependencies {
     implementation("androidx.datastore:datastore-preferences:1.0.0")
     //icons
     implementation("androidx.compose.material:material-icons-extended:1.5.0")
+    //WorkManager
+    val work_version = "2.10.0"
+    implementation("androidx.work:work-runtime-ktx:$work_version")
 
 }

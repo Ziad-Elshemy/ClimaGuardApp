@@ -16,29 +16,36 @@ import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import eg.iti.mad.climaguard.R
 
 sealed class NavigationRoute(val route: String) {
     object Home : NavigationRoute("home_screen")
     object Alarm : NavigationRoute("alarm_screen")
     object Favorite : NavigationRoute("favorite_screen")
     object Setting : NavigationRoute("setting_screen")
-    object Maps : NavigationRoute("maps_screen")
+//    object Maps : NavigationRoute("maps_screen")
 //    object FavItem : NavigationRoute("fav_item_screen")
 
     object FavItem : NavigationRoute("fav_item_screen/{lat}/{lon}") {
         fun createRoute(lat: Double, lon: Double) = "fav_item_screen/$lat/$lon"
     }
+
+    object Maps : NavigationRoute("maps_screen/{screenType}") {
+        fun createRoute(screenType: String) = "maps_screen/$screenType"
+    }
+
 }
 
 @Composable
 fun BottomNavigationBar(navController: NavController) {
     val navigationItems = listOf(
-        NavigationItem("Home", Icons.Default.Cloud, NavigationRoute.Home.route),
-        NavigationItem("Alarm", Icons.Default.Alarm, NavigationRoute.Alarm.route),
-        NavigationItem("Favorite", Icons.Default.Favorite, NavigationRoute.Favorite.route),
-        NavigationItem("Setting", Icons.Default.Settings, NavigationRoute.Setting.route)
+        NavigationItem(stringResource(R.string.home), Icons.Default.Cloud, NavigationRoute.Home.route),
+        NavigationItem(stringResource(R.string.alarm), Icons.Default.Alarm, NavigationRoute.Alarm.route),
+        NavigationItem(stringResource(R.string.favorite), Icons.Default.Favorite, NavigationRoute.Favorite.route),
+        NavigationItem(stringResource(R.string.setting), Icons.Default.Settings, NavigationRoute.Setting.route)
     )
 
     val currentDestination = navController.currentBackStackEntryAsState().value
@@ -49,7 +56,7 @@ fun BottomNavigationBar(navController: NavController) {
     val shouldShowBottomNav = (currentDestination?.destination?.route != NavigationRoute.Maps.route && currentDestination?.destination?.route != NavigationRoute.FavItem.route)
 
     if (shouldShowBottomNav){
-        NavigationBar(containerColor = Color.White) {
+        NavigationBar(containerColor = MaterialTheme.colorScheme.primary) {
             navigationItems.forEachIndexed { index, item ->
                 NavigationBarItem(
                     selected = selectedNavigationIndex == index,
@@ -66,10 +73,11 @@ fun BottomNavigationBar(navController: NavController) {
                     },
                     icon = { Icon(imageVector = item.icon, contentDescription = item.title) },
                     label = {
-                        if (index == selectedNavigationIndex) {Text(item.title, color = if (index == selectedNavigationIndex) Color.Black else Color.Gray)} },
+                        if (index == selectedNavigationIndex) {Text(item.title, color = if (index == selectedNavigationIndex) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.secondary)} },
                     colors = NavigationBarItemDefaults.colors(
                         selectedIconColor = MaterialTheme.colorScheme.surface,
-                        indicatorColor = MaterialTheme.colorScheme.primary
+                        unselectedIconColor = MaterialTheme.colorScheme.onSurface,
+                        indicatorColor = MaterialTheme.colorScheme.tertiary
                     )
                 )
             }

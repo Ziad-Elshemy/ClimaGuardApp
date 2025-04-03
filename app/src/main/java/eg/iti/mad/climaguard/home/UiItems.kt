@@ -32,6 +32,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -58,6 +59,8 @@ import eg.iti.mad.climaguard.model.CurrentResponse
 import eg.iti.mad.climaguard.model.ForecastResponse
 import eg.iti.mad.climaguard.model.ListItem
 import eg.iti.mad.climaguard.utils.Utility
+import eg.iti.mad.climaguard.utils.Utility.Companion.convertToArabicNumbers
+import java.util.Locale
 import kotlin.math.sin
 
 
@@ -68,6 +71,7 @@ fun WeatherScreenUi(
     hourlyList :List<ListItem?>?,
     daysList :List<ListItem?>?
 ){
+    val language = Locale.getDefault().language
     Column(
         modifier = Modifier
             .verticalScroll(rememberScrollState())
@@ -109,7 +113,7 @@ fun WeatherScreenUi(
                 Text(
                     text = "${responseForecast?.city?.country}, ${responseForecast?.city?.name}",
                     fontSize = 14.sp,
-                    color = Color.DarkGray
+                    color = Color(0xFF2A2A2A)
                 )
             }
 
@@ -142,17 +146,22 @@ fun WeatherScreenUi(
                     fontSize = 16.sp,
                     color = Color.White
                 )
-                Text(text = "$date", fontSize = 14.sp, color = Color.DarkGray)
+                Text(text = "$date", fontSize = 14.sp, color = Color(0xFF2A2A2A))
             }
         }
 
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
-                "${responseData?.main?.temp ?: 0}",
+                text = if (language == "ar") {
+                    convertToArabicNumbers(responseData?.main?.temp?.toString() ?: "0")
+                } else {
+                    (responseData?.main?.temp?.toString() ?: "0")
+                },
                 color = Color.White,
                 fontSize = 60.sp,
                 fontWeight = FontWeight.Bold
             )
+
             Text(
                 text = "°C", color = Color.White, fontSize = 20.sp, modifier = Modifier
                     .size(60.dp)
@@ -163,12 +172,16 @@ fun WeatherScreenUi(
         Row (verticalAlignment = Alignment.CenterVertically){
             Text(
                 stringResource(R.string.feels_like),
-                color = Color.DarkGray,
+                color = Color(0xFF2A2A2A),
                 fontSize = 16.sp
             )
             Text(
-                "${responseData?.main?.feelsLike ?: 0}°",
-                color = Color.DarkGray,
+                text = if (language == "ar") {
+                    convertToArabicNumbers((responseData?.main?.feelsLike?.toString() ?: "0"))
+                } else {
+                    (responseData?.main?.feelsLike?.toString() ?: "0")
+                } + "°",
+                color = Color(0xFF2A2A2A),
                 fontSize = 16.sp
             )
         }
@@ -176,27 +189,35 @@ fun WeatherScreenUi(
         Row (verticalAlignment = Alignment.CenterVertically){
             Text(
                 stringResource(R.string.high),
-                color = Color.DarkGray,
+                color = Color(0xFF2A2A2A),
                 fontSize = 16.sp
             )
             Text(
-                "${responseData?.main?.tempMax ?: 0}° ",
-                color = Color.DarkGray,
+                text = if (language == "ar") {
+                    convertToArabicNumbers((responseData.main?.tempMax?.toString() ?: "0"))
+                } else {
+                    (responseData.main?.tempMax?.toString() ?: "0")
+                } + "°",
+                color = Color(0xFF2A2A2A),
                 fontSize = 16.sp
             )
             Text(
                 " • ",
-                color = Color.DarkGray,
+                color = Color(0xFF2A2A2A),
                 fontSize = 16.sp
             )
             Text(
                 stringResource(R.string.low),
-                color = Color.DarkGray,
+                color = Color(0xFF2A2A2A),
                 fontSize = 16.sp
             )
             Text(
-                " ${responseData?.main?.tempMin ?: 0}°",
-                color = Color.DarkGray,
+                text = if (language == "ar") {
+                    convertToArabicNumbers((responseData.main?.tempMin?.toString() ?: "0"))
+                } else {
+                    (responseData.main?.tempMin?.toString() ?: "0")
+                } + "°",
+                color = Color(0xFF2A2A2A),
                 fontSize = 16.sp
             )
         }
@@ -209,7 +230,7 @@ fun WeatherScreenUi(
                 items(hourlyList.orEmpty()) { hourlyItem ->
                     hourlyItem?.let {
                         val time = Utility.getTimeDay(hourlyItem.dt?.times(1000L) ?: 0)
-                        HourlyItem(time, "${hourlyItem.main?.temp}°", hourlyItem.weather?.get(0)?.icon?:"10d" , "10%")
+                        HourlyItem(time, "${hourlyItem.main?.temp}°", hourlyItem.weather?.get(0)?.icon?:"10d" , "${hourlyItem.main?.humidity}",language)
                     }
 
                 }
@@ -229,10 +250,11 @@ fun WeatherScreenUi(
                 "",
                 responseData.clouds?.all?.toFloat() ?: 0f,
                 Color.White,
-                icon = ImageVector.vectorResource(id = R.drawable.ic_cloud)
+                icon = ImageVector.vectorResource(id = R.drawable.ic_cloud),
+                language = language
             )
             HumidityCard(responseData.main?.humidity?.toFloat() ?: 0f,
-                icon = ImageVector.vectorResource(id = R.drawable.ic_humidity))
+                icon = ImageVector.vectorResource(id = R.drawable.ic_humidity),language)
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -246,14 +268,16 @@ fun WeatherScreenUi(
                 value = responseData.main?.pressure.toString(),
                 title = stringResource(R.string.pressure),
                 unit = "hpa",
-                icon = ImageVector.vectorResource(id = R.drawable.ic_pressure)
+                icon = ImageVector.vectorResource(id = R.drawable.ic_pressure),
+                language = language
             )
 
             CircularCard(
                 value = responseData.wind?.speed.toString(),
                 title = stringResource(R.string.wind_speed),
                 unit = "meter/sec",
-                icon = ImageVector.vectorResource(id = R.drawable.ic_wind)
+                icon = ImageVector.vectorResource(id = R.drawable.ic_wind),
+                language = language
             )
         }
 
@@ -269,7 +293,8 @@ fun WeatherScreenUi(
                 value = visibility.toString(),
                 title = stringResource(R.string.visibility),
                 unit = "KM",
-                icon = ImageVector.vectorResource(id = R.drawable.ic_visibility)
+                icon = ImageVector.vectorResource(id = R.drawable.ic_visibility),
+                language = language
             )
             val seaLevel : Int = responseData.main?.seaLevel?:0
             val grandLevel : Int = responseData.main?.grndLevel?:0
@@ -278,7 +303,8 @@ fun WeatherScreenUi(
                 value = altitude.toString(),
                 title = stringResource(R.string.alt),
                 unit = "m",
-                icon = ImageVector.vectorResource(id = R.drawable.ic_altitude)
+                icon = ImageVector.vectorResource(id = R.drawable.ic_altitude),
+                language = language
             )
         }
         Spacer(modifier = Modifier.height(16.dp))
@@ -289,7 +315,7 @@ fun WeatherScreenUi(
                 daysList?.forEach{ daysItem ->
                     DailyItem("${daysItem?.dtTxt}",
                         "${daysItem?.main?.tempMax}","${daysItem?.main?.tempMin}"
-                        ,daysItem?.weather?.get(0)?.icon?:"10d","10")
+                        ,daysItem?.weather?.get(0)?.icon?:"10d","${daysItem?.main?.humidity}", language)
                 }
 //                        days.forEach { day ->
 //                            DailyItem(day, "89°", "81°", R.drawable.header, "20%")
@@ -341,14 +367,9 @@ fun ForecastCard(title: String, icon : ImageVector, content: @Composable () -> U
 }
 
 @Composable
-fun HourlyItem(time: String, temp: String, iconThumbnail: String, chance: String) {
+fun HourlyItem(time: String, temp: String, iconThumbnail: String, humidity: String, language :String) {
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(8.dp)) {
         Text(time, color = Color.White, fontSize = 14.sp)
-//        Image(
-//            painter = painterResource(id = icon),
-//            contentDescription = null,
-//            modifier = Modifier.size(32.dp)
-//        )
         GlideImage(
             imageModel = { "https://openweathermap.org/img/wn/${iconThumbnail}@2x.png" },
             modifier = Modifier
@@ -361,13 +382,30 @@ fun HourlyItem(time: String, temp: String, iconThumbnail: String, chance: String
                 Text(text = stringResource(R.string.failed_to_load), color = Color.Red)
             }
         )
-        Text(temp, color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Bold)
-        Text(chance, color = Color.DarkGray, fontSize = 12.sp)
+        Text(
+            text = if (language == "ar") {
+                convertToArabicNumbers(temp)
+            } else {
+                temp
+            },
+            color = Color.White,
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Bold
+        )
+        Text(
+            text = if (language == "ar") {
+                convertToArabicNumbers("$humidity %")
+            } else {
+                "$humidity %"
+            },
+            color = Color.White,
+            fontSize = 12.sp
+        )
     }
 }
 
 @Composable
-fun DailyItem(day: String, high: String, low: String, iconThumbnail: String, chance: String) {
+fun DailyItem(day: String, high: String, low: String, iconThumbnail: String, humidity: String, language :String) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -388,13 +426,30 @@ fun DailyItem(day: String, high: String, low: String, iconThumbnail: String, cha
                 Text(text = stringResource(R.string.failed_to_load), color = Color.Red)
             }
         )
-        Text("$high° / $low°", color = Color.White, fontSize = 16.sp)
-        Text(chance, color = Color.DarkGray, fontSize = 14.sp)
+        Text(
+            text = if (language == "ar") {
+                "${convertToArabicNumbers(high)}° / ${convertToArabicNumbers(low)}°"
+            } else {
+                "$high° / $low°"
+            },
+            color = Color.White,
+            fontSize = 16.sp
+        )
+
+        Text(
+            text = if (language == "ar") {
+                "${convertToArabicNumbers(humidity)} %"
+            } else {
+                "$humidity %"
+            },
+            color = Color.White,
+            fontSize = 14.sp
+        )
     }
 }
 
 @Composable
-fun HumidityCard(humidity: Float,icon: ImageVector) {
+fun HumidityCard(humidity: Float,icon: ImageVector, language :String) {
 
     Card(
         modifier = Modifier
@@ -429,7 +484,11 @@ fun HumidityCard(humidity: Float,icon: ImageVector) {
                     Text(text = stringResource(R.string.humidity), color = Color.White, fontSize = 14.sp)
                 }
                 Text(
-                    text = "${humidity.toInt()}%",
+                    text = if (language == "ar") {
+                        "${convertToArabicNumbers(humidity.toString())}%"
+                    } else {
+                        "${humidity.toInt()}%"
+                    },
                     color = Color.White,
                     fontSize = 32.sp,
                     fontWeight = FontWeight.Bold
@@ -475,7 +534,8 @@ fun CircularWithProgressCard(
     progress: Float,
     progressColor: Color,
     icon: ImageVector,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    language :String
 ) {
     val progress = animateFloatAsState(targetValue = progress / 100f, animationSpec = tween(1000))
     Card(
@@ -516,8 +576,13 @@ fun CircularWithProgressCard(
                     )
                     Text(text = title, color = Color.White, fontSize = 14.sp)
                 }
+
                 Text(
-                    text = value,
+                    text = if (language == "ar") {
+                        convertToArabicNumbers(value)
+                    } else {
+                        value
+                    },
                     color = Color.White,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold
@@ -535,7 +600,8 @@ fun CircularCard(
     value: String,
     unit: String,
     icon: ImageVector,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    language :String
 ) {
     Card(
         shape = CircleShape,
@@ -563,7 +629,17 @@ fun CircularCard(
                 )
                 Text(text = title, color = Color.White, fontSize = 14.sp)
             }
-            Text(text = value, color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+            Text(
+                text = if (language == "ar") {
+                    convertToArabicNumbers(value)
+                } else {
+                    value
+                },
+                color = Color.White,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold
+            )
+
             Text(text = unit, color = Color.DarkGray, fontSize = 10.sp)
         }
     }
