@@ -65,6 +65,22 @@ class AlarmViewModel(private val repo: Repository) : ViewModel()  {
         }
     }
 
+    fun deleteAlarmById(dateTime: Long) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val result = repo.removeAlarmById(dateTime)
+                if (result > 0) {
+                    _message.emit("${dateTime} Deleted Successfully!")
+
+                } else {
+                    _message.emit("Alarm is already deleted res: $result")
+                }
+            } catch (ex: Exception) {
+                _message.emit("Couldn't delete Alarm :${ex.message}")
+            }
+        }
+    }
+
     fun saveAlarm(alarm: AlarmEntity) {
         viewModelScope.launch(Dispatchers.IO) {
             try {

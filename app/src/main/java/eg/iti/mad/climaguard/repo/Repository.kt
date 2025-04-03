@@ -23,5 +23,6 @@ interface Repository {
     suspend fun getAllAlarms(): Flow<List<AlarmEntity>?>
     suspend fun addAlarm(alarm: AlarmEntity): Long
     suspend fun removeAlarm(alarm: AlarmEntity): Int
+    suspend fun removeAlarmById(alarmId: Long): Int
 
 }

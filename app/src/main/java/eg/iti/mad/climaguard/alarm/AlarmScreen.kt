@@ -46,6 +46,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
 import androidx.navigation.NavController
+import androidx.work.BackoffPolicy
+import androidx.work.Constraints
+import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.workDataOf
@@ -208,7 +211,7 @@ fun AlarmSettingsBottomSheet(
                 Log.d("DEBUG", "Alarm scheduled after $delay ms")
 
                 if (delay > 0) {
-                    scheduleAlarmWorker(context, location.name, "Your alarm is set!", notificationType, delay)
+                    scheduleAlarmWorker(context,dateTimeInMillis, location.name, "Your alarm is set!", notificationType, delay,location.lat,location.lon)
                 }
 
                 val alarmEntity = AlarmEntity(
@@ -231,16 +234,36 @@ fun AlarmSettingsBottomSheet(
     }
 }
 
-fun scheduleAlarmWorker(context: Context, title: String, message: String, type: String, delay: Long) {
+fun scheduleAlarmWorker(
+    context: Context,
+    dateTime: Long,
+    title: String,
+    message: String,
+    type: String,
+    delay: Long,
+    lat: Double,
+    lon: Double
+) {
     val data = workDataOf(
+        "DATE_TIME" to dateTime,
         "TITLE" to title,
         "MESSAGE" to message,
-        "TYPE" to type
+        "TYPE" to type,
+        "LAT" to lat,
+        "LON" to lon
     )
+
+    val constraints = Constraints.Builder()
+        .setRequiredNetworkType(NetworkType.CONNECTED)
+        .build()
 
     val alarmRequest = OneTimeWorkRequestBuilder<AlarmWorker>()
         .setInitialDelay(delay, TimeUnit.MILLISECONDS)
         .setInputData(data)
+        .setBackoffCriteria(
+            BackoffPolicy.LINEAR,5,TimeUnit.SECONDS
+        )
+        .setConstraints(constraints)
         .build()
 
     WorkManager.getInstance(context).enqueue(alarmRequest)

@@ -18,4 +18,9 @@ interface AlarmDao {
 
     @Delete
     suspend fun deleteAlarm(alarm: AlarmEntity) :Int
+
+
+    @Query("DELETE FROM alarms WHERE dateTime = :alarmId")
+    suspend fun deleteAlarmById(alarmId: Long): Int
+
 }

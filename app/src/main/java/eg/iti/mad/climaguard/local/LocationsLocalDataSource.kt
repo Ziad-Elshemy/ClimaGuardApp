@@ -14,4 +14,5 @@ interface LocationsLocalDataSource {
     suspend fun getAllAlarms(): Flow<List<AlarmEntity>>
     suspend fun insertAlarm(alarm: AlarmEntity): Long
     suspend fun deleteAlarm(alarm: AlarmEntity): Int
+    suspend fun deleteAlarmById(alarmId: Long): Int
 }
