@@ -170,13 +170,13 @@ class MainActivity : ComponentActivity() {
             val targetScreen = intent?.getStringExtra("TARGET_SCREEN")
             val notificationId = intent?.getIntExtra("NOTIFICATION_ID", -1)
             val dateTime = intent?.getLongExtra("DATE_TIME", -1)
-            val lat = intent?.getDoubleExtra("LAT",30.0)
-            val lon = intent?.getDoubleExtra("LON",29.0)
+            val targetLat = intent?.getDoubleExtra("LAT",30.0)
+            val targetLon = intent?.getDoubleExtra("LON",29.0)
 
             LaunchedEffect(targetScreen) {
                 if (targetScreen != null && targetScreen == "home") {
-                    if (lat != null && lon !=null) {
-                        navController.navigate(NavigationRoute.FavItem.createRoute(lat, lon))
+                    if (targetLat != null && targetLon !=null) {
+                        navController.navigate(NavigationRoute.FavItem.createRoute(targetLat, targetLon))
                     }
                     // delete notification from database
                     if (dateTime != null && dateTime != -1L) {

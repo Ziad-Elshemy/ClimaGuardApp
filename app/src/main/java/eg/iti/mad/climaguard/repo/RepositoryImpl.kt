@@ -8,7 +8,7 @@ import eg.iti.mad.climaguard.model.ForecastResponse
 import eg.iti.mad.climaguard.model.LocationEntity
 import kotlinx.coroutines.flow.Flow
 
-class RepositoryImpl private constructor(
+class RepositoryImpl(
     private val weatherRemoteDataSource: WeatherRemoteDataSource,
     private val locationsLocalDataSource: LocationsLocalDataSource
 ): Repository {
