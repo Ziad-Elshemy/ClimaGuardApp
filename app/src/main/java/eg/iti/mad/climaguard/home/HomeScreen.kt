@@ -2,11 +2,6 @@ package eg.iti.mad.climaguard.home
 
 import android.location.Location
 import android.util.Log
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -15,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.foundation.layout.wrapContentSize
 
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.res.stringResource
 
@@ -40,6 +36,15 @@ fun HomeScreen(viewModel: HomeViewModel,location: Location) {
     val uiForecastState by viewModel.forecastResponse.collectAsStateWithLifecycle()
     val hourlyList by viewModel.hourlyForecastResponseList.collectAsStateWithLifecycle()
     val daysList by viewModel.fiveDaysForecastWeatherList.collectAsStateWithLifecycle()
+    val tempUnit by viewModel.tempUnit.collectAsState()
+
+    val tempUnitSymbol = when (tempUnit) {
+        "metric" -> stringResource(R.string.c)
+        "imperial" -> stringResource(R.string.f)
+        "standard" -> stringResource(R.string.k)
+        else -> ""
+    }
+
 
 
     LaunchedEffect(hourlyList, daysList) {
@@ -69,7 +74,8 @@ fun HomeScreen(viewModel: HomeViewModel,location: Location) {
                         responseData = responseData,
                         responseForecast = responseForecast,
                         hourlyList = hourlyList,
-                        daysList = daysList
+                        daysList = daysList,
+                        tempUnitSymbol = tempUnitSymbol
                     )
                     Log.d("HomeScreen", "HomeScreen: Response.Success")
                 }

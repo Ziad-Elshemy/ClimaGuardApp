@@ -40,6 +40,9 @@
     <string name="cancel">إلغاء</string>
     <string name="weather_in">الطقس في %1$s: %2$s</string>
     <string name="dismiss_alarm">إيقاف المنبه</string>
+    <string name="c">°س</string>
+    <string name="f">°ف</string>
+    <string name="k">ك</string>
 
 
 </resources>

@@ -8,6 +8,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -34,7 +35,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -71,7 +71,8 @@ fun WeatherScreenUi(
     responseData : CurrentResponse,
     responseForecast : ForecastResponse?,
     hourlyList :List<ListItem?>?,
-    daysList :List<ListItem?>?
+    daysList :List<ListItem?>?,
+    tempUnitSymbol: String
 ){
     val language = Locale.getDefault().language
     Column(
@@ -165,7 +166,7 @@ fun WeatherScreenUi(
             )
 
             Text(
-                text = "°C", color = Color.White, fontSize = 20.sp, modifier = Modifier
+                text = tempUnitSymbol, color = Color.White, fontSize = 20.sp, modifier = Modifier
                     .size(60.dp)
                     .padding(bottom = 20.dp)
             )
@@ -506,7 +507,7 @@ fun HumidityCard(humidity: Float,icon: ImageVector, language :String) {
             .padding(8.dp)
             .clip(RoundedCornerShape(20.dp)),
         colors = CardDefaults.cardColors(
-            containerColor = Color.Black
+            containerColor = Color(0xFF5D93AD)
         )
     ) {
         Box(
@@ -527,10 +528,10 @@ fun HumidityCard(humidity: Float,icon: ImageVector, language :String) {
                         contentDescription = null,
                         tint = Color.White,
                         modifier = Modifier
-                            .size(16.dp)
+                            .size(20.dp)
                             .padding(end = 4.dp)
                     )
-                    Text(text = stringResource(R.string.humidity), color = Color.White, fontSize = 14.sp)
+                    Text(text = stringResource(R.string.humidity), color = Color.White, fontSize = 16.sp)
                 }
                 Text(
                     text = if (language == "ar") {
@@ -592,7 +593,9 @@ fun CircularWithProgressCard(
             .size(150.dp)
             .padding(8.dp)
             .clip(RoundedCornerShape(20.dp)),
-        colors = CardDefaults.cardColors(containerColor = Color.Black)
+        colors = CardDefaults.cardColors(
+            containerColor = Color(0xFF5DAAAD)
+        )
     ) {
         Box(
             contentAlignment = Alignment.Center,
@@ -620,10 +623,10 @@ fun CircularWithProgressCard(
                         contentDescription = null,
                         tint = Color.White,
                         modifier = Modifier
-                            .size(16.dp)
+                            .size(20.dp)
                             .padding(end = 4.dp)
                     )
-                    Text(text = title, color = Color.White, fontSize = 14.sp)
+                    Text(text = title, color = Color.White, fontSize = 16.sp)
                 }
 
                 Text(
@@ -654,10 +657,17 @@ fun CircularCard(
 ) {
     Card(
         shape = CircleShape,
-        colors = CardDefaults.cardColors(containerColor = Color.Black),
+        colors = CardDefaults.cardColors(
+            containerColor = Color(0xFF2C3F6B)
+        ),
         modifier = modifier
             .size(150.dp)
             .padding(8.dp)
+            .border(
+                width = 1.dp,
+                color = Color(0xFF4E69AB),
+                shape = CircleShape
+            )
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -673,10 +683,10 @@ fun CircularCard(
                     contentDescription = null,
                     tint = Color.White,
                     modifier = Modifier
-                        .size(16.dp)
+                        .size(20.dp)
                         .padding(end = 4.dp)
                 )
-                Text(text = title, color = Color.White, fontSize = 14.sp)
+                Text(text = title, color = Color.White, fontSize = 16.sp)
             }
             Text(
                 text = if (language == "ar") {
@@ -689,7 +699,7 @@ fun CircularCard(
                 fontWeight = FontWeight.Bold
             )
 
-            Text(text = unit, color = Color.DarkGray, fontSize = 10.sp)
+            Text(text = unit, color = Color.White, fontSize = 14.sp)
         }
     }
 }

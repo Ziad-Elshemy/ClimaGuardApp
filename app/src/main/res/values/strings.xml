@@ -39,4 +39,7 @@
     <string name="cancel">Cancel</string>
     <string name="weather_in">Weather in %1$s: %2$s</string>
     <string name="dismiss_alarm">Dismiss Alarm</string>
+    <string name="c">°C</string>
+    <string name="f">°F</string>
+    <string name="k">K</string>
 </resources>
