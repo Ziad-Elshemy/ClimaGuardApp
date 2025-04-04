@@ -18,6 +18,9 @@ interface LocationDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertLocation(location: LocationEntity) :Long
 
+    @Query("SELECT * FROM favorite_locations WHERE id = :locationId")
+    suspend fun getLocationById(locationId: Int): LocationEntity?
+
     @Update
     suspend fun updateLocation(location: LocationEntity)
 
