@@ -40,6 +40,20 @@
     <string name="cancel">إلغاء</string>
     <string name="weather_in">الطقس في %1$s: %2$s</string>
     <string name="dismiss_alarm">إيقاف المنبه</string>
+    <string name="c">°س</string>
+    <string name="f">°ف</string>
+    <string name="k">ك</string>
+    <string name="hpa">هكتوباسكال</string>
+    <string name="km">كم</string>
+    <string name="meter_sec">متر/ثانية</string>
+    <string name="miles_hour">ميل/ساعة</string>
+    <string name="m">متر</string>
+    <string name="english">English</string>
+    <string name="arabic">العربية</string>
+    <string name="kelvin">كيلفن</string>
+    <string name="celsius">سليزس</string>
+    <string name="fahrenheit">فهرنهايت</string>
+    <string name="save_location">حفظ الموقع</string>
 
 
 </resources>

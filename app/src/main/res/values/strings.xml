@@ -39,4 +39,18 @@
     <string name="cancel">Cancel</string>
     <string name="weather_in">Weather in %1$s: %2$s</string>
     <string name="dismiss_alarm">Dismiss Alarm</string>
+    <string name="c">°C</string>
+    <string name="f">°F</string>
+    <string name="k">K</string>
+    <string name="hpa">hpa</string>
+    <string name="km">KM</string>
+    <string name="meter_sec">meter/sec</string>
+    <string name="miles_hour">miles/hour</string>
+    <string name="m">m</string>
+    <string name="english">English</string>
+    <string name="arabic">العربية</string>
+    <string name="kelvin">Kelvin</string>
+    <string name="celsius">Celsius</string>
+    <string name="fahrenheit">Fahrenheit</string>
+    <string name="save_location">Save Location</string>
 </resources>

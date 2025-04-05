@@ -25,6 +25,7 @@ import com.google.maps.android.compose.*
 import eg.iti.mad.climaguard.R
 import eg.iti.mad.climaguard.model.AlarmEntity
 import eg.iti.mad.climaguard.model.LocationEntity
+import eg.iti.mad.climaguard.utils.LocationPreferences
 import kotlinx.coroutines.launch
 
 @Composable
@@ -168,6 +169,7 @@ fun MapScreen(viewModel: MapViewModel,
                 }
             }
 
+            val locationPrefs = remember { LocationPreferences(context) }
 
             FloatingActionButton(
                 onClick = {
@@ -186,7 +188,8 @@ fun MapScreen(viewModel: MapViewModel,
                                     lon = selectedLocation.longitude
                                 )
                             )
-                        } else if (screenType == "alarm") {
+                        }
+                        else if (screenType == "alarm") {
                             val locationEntity = LocationEntity(
                                 name = city,
                                 country = country,
@@ -200,6 +203,12 @@ fun MapScreen(viewModel: MapViewModel,
                                 ?.savedStateHandle
                                 ?.set("selected_location", locationJson)
                         }
+                        else if (screenType == "settings") {
+                            locationPrefs.saveLocation(
+                                selectedLocation.latitude,
+                                selectedLocation.longitude
+                            )
+                        }
                         navController.popBackStack()
                     }
                 },
@@ -209,9 +218,10 @@ fun MapScreen(viewModel: MapViewModel,
                     .padding(16.dp)
             ) {
                 Text(
-                    text = if (screenType == "favorite") stringResource(R.string.add_location) else stringResource(
-                        R.string.select_location
-                    ),
+                    text =
+                    if (screenType == "favorite") stringResource(R.string.add_location)
+                    else if (screenType == "alarm")  stringResource(R.string.select_location)
+                    else stringResource(R.string.save_location),
                     fontSize = 16.sp
                 )
             }
