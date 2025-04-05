@@ -90,5 +90,30 @@ dependencies {
     //LiveData & Compose
     val compose_version = "1.0.0"
     implementation ("androidx.compose.runtime:runtime-livedata:$compose_version")
+    //dataStore
+    implementation("androidx.datastore:datastore-preferences:1.0.0")
+    //icons
+    implementation("androidx.compose.material:material-icons-extended:1.5.0")
+    //WorkManager
+    val work_version = "2.10.0"
+    implementation("androidx.work:work-runtime-ktx:$work_version")
+
+    //splash
+    implementation("androidx.core:core-splashscreen:1.0.0")
+    implementation("com.airbnb.android:lottie-compose:5.0.3")
+
+
+
+    // TESTING
+
+    androidTestImplementation ("androidx.test.ext:junit:1.1.5")
+    // AndroidX JUnit
+    testImplementation ("io.mockk:mockk:1.13.8")
+    // AndroidX and Robolectric
+    testImplementation ("androidx.test.ext:junit-ktx:1.1.5")
+    testImplementation ("androidx.test:core-ktx:1.5.0")
+    testImplementation ("org.robolectric:robolectric:4.11.1")
+    //kotlinx-coroutines
+    testImplementation ("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.1")
 
 }

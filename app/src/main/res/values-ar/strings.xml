@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">حارس الطقس</string>
+    <string name="title_activity_main2">النشاط الرئيسي 2</string>
+    <string name="feels_like">تشعر كأنها</string>
+    <string name="high">"أعلى "</string>
+    <string name="low">" أدنى"</string>
+    <string name="sunrise">"الشروق "</string>
+    <string name="sunset">" الغروب"</string>
+    <string name="failed_to_fetch_data">فشل في جلب البيانات</string>
+    <string name="hourly_forecast">التوقعات لكل ساعة</string>
+    <string name="clouds">الغيوم</string>
+    <string name="pressure">الضغط الجوي</string>
+    <string name="wind_speed">سرعة الرياح</string>
+    <string name="visibility">الرؤية</string>
+    <string name="alt">الارتفاع</string>
+    <string name="_5_day_forecast">توقعات 5 أيام</string>
+    <string name="failed_to_load">فشل في التحميل</string>
+    <string name="humidity">الرطوبة</string>
+    <string name="home">الرئيسية</string>
+    <string name="alarm">المنبه</string>
+    <string name="favorite">المفضلة</string>
+    <string name="setting">الإعدادات</string>
+    <string name="settings">الإعدادات</string>
+    <string name="location">الموقع</string>
+    <string name="use_gps">استخدام GPS</string>
+    <string name="pick_from_map">اختيار من الخريطة</string>
+    <string name="temperature_unit">وحدة الحرارة</string>
+    <string name="wind_speed_unit">وحدة سرعة الرياح</string>
+    <string name="language">اللغة</string>
+    <string name="save_settings">حفظ الإعدادات</string>
+    <string name="search_for_a_place">البحث عن مكان...</string>
+    <string name="add_location">إضافة موقع</string>
+    <string name="select_location">اختيار الموقع</string>
+    <string name="select_date">اختر التاريخ: %1$s</string>
+    <string name="select_time">اختر الوقت: %1$s</string>
+    <string name="notification">إشعار</string>
+    <string name="alarm_type">منبه</string>
+    <string name="save">حفظ</string>
+    <string name="cancel">إلغاء</string>
+    <string name="weather_in">الطقس في %1$s: %2$s</string>
+    <string name="dismiss_alarm">إيقاف المنبه</string>
+    <string name="c">°س</string>
+    <string name="f">°ف</string>
+    <string name="k">ك</string>
+    <string name="hpa">هكتوباسكال</string>
+    <string name="km">كم</string>
+    <string name="meter_sec">متر/ثانية</string>
+    <string name="miles_hour">ميل/ساعة</string>
+    <string name="m">متر</string>
+    <string name="english">English</string>
+    <string name="arabic">العربية</string>
+    <string name="kelvin">كيلفن</string>
+    <string name="celsius">سليزس</string>
+    <string name="fahrenheit">فهرنهايت</string>
+    <string name="save_location">حفظ الموقع</string>
+
+
+</resources>
