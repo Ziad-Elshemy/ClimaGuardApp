@@ -4,6 +4,7 @@ package eg.iti.mad.climaguard.alarm
 import android.content.Context
 import android.os.Build
 import android.util.Log
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -81,6 +82,7 @@ import eg.iti.mad.climaguard.model.Response
 import eg.iti.mad.climaguard.navigation.NavigationRoute
 import eg.iti.mad.climaguard.worker.AlarmWorker
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneId
 import java.util.UUID
@@ -360,6 +362,10 @@ fun AlarmSettingsBottomSheet(
 
             // save button
             Button(onClick = {
+                if (!isFutureDateTime(selectedDate, selectedTime)) {
+                    Toast.makeText(context, "Please select a future date and time", Toast.LENGTH_SHORT).show()
+                    return@Button
+                }
                 val dateTime = selectedDate.atTime(selectedTime)
                 val dateTimeInMillis = dateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
                 val currentTime = System.currentTimeMillis()
@@ -394,3 +400,9 @@ fun AlarmSettingsBottomSheet(
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
+fun isFutureDateTime(date: LocalDate, time: LocalTime): Boolean {
+    val selectedDateTime = date.atTime(time)
+    val now = LocalDateTime.now()
+    return selectedDateTime.isAfter(now)
+}

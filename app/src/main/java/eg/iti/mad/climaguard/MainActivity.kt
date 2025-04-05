@@ -24,24 +24,32 @@ import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.createGraph
+import com.airbnb.lottie.LottieComposition
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.rememberLottieComposition
 import com.example.newsapp.api.ApiManager
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
@@ -79,6 +87,7 @@ import eg.iti.mad.climaguard.utils.Utility.Companion.setAppLocale
 import eg.iti.mad.climaguard.worker.SoundService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -103,6 +112,7 @@ class MainActivity : ComponentActivity() {
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
+        val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
@@ -168,9 +178,25 @@ class MainActivity : ComponentActivity() {
             )
         }
 
+        splashScreen.setKeepOnScreenCondition {
+            // false to hide
+            false
+        }
+
+        splashScreen.setOnExitAnimationListener { splashView ->
+            // do animation here
+            splashView.remove()
+        }
+
         setContent {
 
             val navController = rememberNavController()
+//
+//            val showSplash = remember { mutableStateOf(true) }
+//            LaunchedEffect(Unit) {
+//                delay(2000)
+//                showSplash.value = false
+//            }
 
             LaunchedEffect(Unit) {
                 settingsDataStore.gpsEnabled.collect {
@@ -216,73 +242,81 @@ class MainActivity : ComponentActivity() {
                 ClimaGuardTheme {
 //                    val navController = rememberNavController()
 
-                    Scaffold(
-                        modifier = Modifier
-                            .fillMaxSize(),
-                        bottomBar = { BottomNavigationBar(navController) }
-                    ) { innerPadding ->
+//                    if (showSplash.value) {
+//                        SplashScreenContent()
+//                    } else {
 
-                        val gpsLocation = locationState.collectAsState().value
-                        val currentLocation: Location = if (isGpsEnabled) {
-                            gpsLocation
-                        } else {
-                            Location("").apply {
-                                latitude = locationPrefs.getLocation().first
-                                longitude = locationPrefs.getLocation().second
+                        Scaffold(
+                            modifier = Modifier
+                                .fillMaxSize(),
+                            bottomBar = { BottomNavigationBar(navController) }
+                        ) { innerPadding ->
+
+                            val gpsLocation = locationState.collectAsState().value
+                            val currentLocation: Location = if (isGpsEnabled) {
+                                gpsLocation
+                            } else {
+                                Location("").apply {
+                                    latitude = locationPrefs.getLocation().first
+                                    longitude = locationPrefs.getLocation().second
+                                }
                             }
-                        }
 
-                        val graph =
-                            navController.createGraph(startDestination = NavigationRoute.Home.route) {
-                                composable(route = NavigationRoute.Maps.route) { backStackEntry ->
-                                    val screenType = backStackEntry.arguments?.getString("screenType")?:"favorite"
-                                    MapScreen(
-                                        mapViewModel
-                                        , currentLocation,
-                                        screenType = screenType,
-                                        navController
-                                    )
-                                }
-                                composable(route = NavigationRoute.FavItem.route) { backStackEntry ->
-                                    val lat = backStackEntry.arguments?.getString("lat")?.toDoubleOrNull() ?: 0.0
-                                    val lon = backStackEntry.arguments?.getString("lon")?.toDoubleOrNull() ?: 0.0
-
-                                    val location = Location("").apply {
-                                        latitude = lat
-                                        longitude = lon
-                                    }
-
-                                    FavItemScreen(homeViewModel, location)
-                                }
-                                composable(route = NavigationRoute.Favorite.route) {
-                                    FavoriteScreen(navController,favoriteViewModel)
-                                }
-                                composable(route = NavigationRoute.Setting.route) {
-                                    SettingsScreen(navController,settingsViewModel)
-                                }
-                                composable(route = NavigationRoute.Home.route) {
-                                    if (currentLocation.latitude != 0.0){
-                                        HomeScreen(
-                                            homeViewModel,
-                                            currentLocation
+                            val graph =
+                                navController.createGraph(startDestination = NavigationRoute.Home.route) {
+                                    composable(route = NavigationRoute.Maps.route) { backStackEntry ->
+                                        val screenType =
+                                            backStackEntry.arguments?.getString("screenType")
+                                                ?: "favorite"
+                                        MapScreen(
+                                            mapViewModel, currentLocation,
+                                            screenType = screenType,
+                                            navController
                                         )
                                     }
+                                    composable(route = NavigationRoute.FavItem.route) { backStackEntry ->
+                                        val lat = backStackEntry.arguments?.getString("lat")
+                                            ?.toDoubleOrNull() ?: 0.0
+                                        val lon = backStackEntry.arguments?.getString("lon")
+                                            ?.toDoubleOrNull() ?: 0.0
 
-                                }
-                                composable(route = NavigationRoute.Alarm.route) {
-                                    AlarmScreen(
-                                        navController,
-                                        alarmViewModel
-                                    )
-                                }
-                            }
-                        NavHost(
-                            navController = navController,
-                            graph = graph,
-                            modifier = Modifier.padding(innerPadding)
-                        )
+                                        val location = Location("").apply {
+                                            latitude = lat
+                                            longitude = lon
+                                        }
 
-                    }
+                                        FavItemScreen(homeViewModel, location)
+                                    }
+                                    composable(route = NavigationRoute.Favorite.route) {
+                                        FavoriteScreen(navController, favoriteViewModel)
+                                    }
+                                    composable(route = NavigationRoute.Setting.route) {
+                                        SettingsScreen(navController, settingsViewModel)
+                                    }
+                                    composable(route = NavigationRoute.Home.route) {
+                                        if (currentLocation.latitude != 0.0) {
+                                            HomeScreen(
+                                                homeViewModel,
+                                                currentLocation
+                                            )
+                                        }
+
+                                    }
+                                    composable(route = NavigationRoute.Alarm.route) {
+                                        AlarmScreen(
+                                            navController,
+                                            alarmViewModel
+                                        )
+                                    }
+                                }
+                            NavHost(
+                                navController = navController,
+                                graph = graph,
+                                modifier = Modifier.padding(innerPadding)
+                            )
+
+                        }
+//                    }
                 }
             }
 
@@ -292,6 +326,18 @@ class MainActivity : ComponentActivity() {
 
         // for the testing branch
 
+    }
+
+    @Composable
+    fun SplashScreenContent() {
+
+        val composition by rememberLottieComposition(spec = LottieCompositionSpec.RawRes(R.raw.splash_animation))
+
+        LottieAnimation(
+            composition = composition,
+            modifier = Modifier.fillMaxSize(),
+            iterations = LottieConstants.IterateForever
+        )
     }
 
 
