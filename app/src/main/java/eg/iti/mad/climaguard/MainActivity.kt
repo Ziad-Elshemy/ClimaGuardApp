@@ -170,13 +170,6 @@ class MainActivity : ComponentActivity() {
         ).get(SettingsViewModel::class.java)
 
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            ActivityCompat.requestPermissions(
-                this,
-                arrayOf(android.Manifest.permission.POST_NOTIFICATIONS),
-                101
-            )
-        }
 
         splashScreen.setKeepOnScreenCondition {
             // false to hide

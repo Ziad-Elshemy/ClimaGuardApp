@@ -1,10 +1,12 @@
 package eg.iti.mad.climaguard.alarm
 
 
+import android.app.Activity
 import android.content.Context
 import android.os.Build
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.compose.LocalActivity
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -61,6 +63,7 @@ import androidx.compose.ui.text.font.FontWeight
 
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.app.ActivityCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 
@@ -99,6 +102,7 @@ fun AlarmScreen(navController: NavController, viewModel: AlarmViewModel) {
 
     val snackBarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
+    val activity = LocalActivity.current as Activity
 
     var selectedLocation by remember { mutableStateOf<LocationEntity?>(null) }
     var showBottomSheet by remember { mutableStateOf(false) }
@@ -123,6 +127,14 @@ fun AlarmScreen(navController: NavController, viewModel: AlarmViewModel) {
     Scaffold(
         floatingActionButton = {
             FloatingActionButton(onClick = {
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    ActivityCompat.requestPermissions(
+                        activity,
+                        arrayOf(android.Manifest.permission.POST_NOTIFICATIONS),
+                        101
+                    )
+                }
                 navController.navigate(NavigationRoute.Maps.createRoute("alarm")) // show map screen
             }) {
                 Icon(imageVector = Icons.Default.LocationOn, contentDescription = "Open Map")

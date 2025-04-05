@@ -1,7 +1,9 @@
 package eg.iti.mad.climaguard.home
 
+import android.content.Intent
 import android.location.Location
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -12,6 +14,7 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 
 import androidx.compose.ui.unit.sp
@@ -20,6 +23,8 @@ import eg.iti.mad.climaguard.R
 
 import eg.iti.mad.climaguard.model.ForecastResponse
 import eg.iti.mad.climaguard.model.Response
+import eg.iti.mad.climaguard.utils.Utility.Companion.isInternetAvailable
+import android.provider.Settings
 
 
 @Composable
@@ -32,6 +37,7 @@ fun HomeScreen(viewModel: HomeViewModel,location: Location) {
 //    viewModel.fetchWeatherData(location.latitude,location.longitude)
 
 //    val currentWeatherState = viewModel.currentResponse.observeAsState()
+    val context = LocalContext.current
     val uiState by viewModel.currentResponse.collectAsStateWithLifecycle()
     val uiForecastState by viewModel.forecastResponse.collectAsStateWithLifecycle()
     val hourlyList by viewModel.hourlyForecastResponseList.collectAsStateWithLifecycle()
@@ -59,6 +65,14 @@ fun HomeScreen(viewModel: HomeViewModel,location: Location) {
             Log.d("hourlyList", "Hourly list updated: ${hourlyList?.get(0)?.main?.tempMax?:"empty"}")
             Log.d("hourlyList", "Days list updated: ${daysList?.get(0)?.main?.tempMax?:"empty"}")
             Log.d("hourlyList", "HomeScreen: ===============================")
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        if (!isInternetAvailable(context)) {
+            Toast.makeText(context, "No Internet Connection", Toast.LENGTH_SHORT).show()
+            val intent = Intent(Settings.ACTION_WIFI_SETTINGS)
+            context.startActivity(intent)
         }
     }
 
