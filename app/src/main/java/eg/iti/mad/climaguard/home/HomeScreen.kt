@@ -45,6 +45,13 @@ fun HomeScreen(viewModel: HomeViewModel,location: Location) {
         else -> ""
     }
 
+    val windUnitSymbol = when (tempUnit) {
+        "metric" -> stringResource(R.string.meter_sec)
+        "imperial" -> stringResource(R.string.miles_hour)
+        "standard" -> stringResource(R.string.meter_sec)
+        else -> ""
+    }
+
 
 
     LaunchedEffect(hourlyList, daysList) {
@@ -75,7 +82,8 @@ fun HomeScreen(viewModel: HomeViewModel,location: Location) {
                         responseForecast = responseForecast,
                         hourlyList = hourlyList,
                         daysList = daysList,
-                        tempUnitSymbol = tempUnitSymbol
+                        tempUnitSymbol = tempUnitSymbol,
+                        windUnitSymbol = windUnitSymbol
                     )
                     Log.d("HomeScreen", "HomeScreen: Response.Success")
                 }

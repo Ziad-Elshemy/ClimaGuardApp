@@ -353,36 +353,6 @@ class MainActivity : ComponentActivity() {
                 setMinUpdateIntervalMillis(5000)
             }.build(),
             object : LocationCallback(){
-//                override fun onLocationResult(currentLocation: LocationResult) {
-//                    super.onLocationResult(currentLocation)
-//                    locationState.value = currentLocation.lastLocation?: Location(LocationManager.GPS_PROVIDER)
-//                    Log.i(TAG, "onLocationResult: lat = ${locationState.value.latitude}  long = ${locationState.value.longitude}")
-//                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-//                        geocoder.getFromLocation(locationState.value.latitude,locationState.value.longitude,1, object :
-//                            GeocodeListener {
-//                            override fun onGeocode(addressList: MutableList<Address>) {
-//                                address.value = addressList[0].countryName + ", " + addressList[0].adminArea + ", " + addressList[0].subAdminArea
-//                                Log.d(TAG, "onGeocode: ${address.value}")
-//                            }
-//                        })
-//                    }
-//
-//                }
-//                override fun onLocationResult(currentLocation: LocationResult) {
-//                    super.onLocationResult(currentLocation)
-//
-//                    val newLocation = currentLocation.lastLocation ?: return
-//
-//                    // ✅ التأكد من اختلاف القيم قبل التحديث
-//                    if (newLocation.latitude != _locationState.value.latitude ||
-//                        newLocation.longitude != _locationState.value.longitude) {
-//
-//                        _locationState.value = newLocation
-//                        Log.i(TAG, "Location updated: lat = ${_locationState.value.latitude}, lon = ${_locationState.value.longitude}")
-//                    } else {
-//                        Log.i(TAG, "Same location, no update needed.")
-//                    }
-//                }
                 override fun onLocationResult(currentLocation: LocationResult) {
                     super.onLocationResult(currentLocation)
 

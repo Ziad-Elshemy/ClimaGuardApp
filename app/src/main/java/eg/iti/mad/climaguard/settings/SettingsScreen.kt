@@ -125,8 +125,10 @@ fun SectionTitle(title: String, icon: androidx.compose.ui.graphics.vector.ImageV
 
 @Composable
 fun TemperatureUnitDropdown(selectedUnit: String, onUnitSelected: (String) -> Unit) {
-    val units = listOf("Kelvin", "Celsius", "Fahrenheit")
-    val apiUnits = mapOf("Kelvin" to "standard", "Celsius" to "metric", "Fahrenheit" to "imperial")
+    val units = listOf(stringResource(R.string.kelvin),
+        stringResource(R.string.celsius), stringResource(R.string.fahrenheit)
+    )
+    val apiUnits = mapOf(stringResource(R.string.kelvin) to "standard", stringResource(R.string.celsius) to "metric", stringResource(R.string.fahrenheit) to "imperial")
 
     var expanded by remember { mutableStateOf(false) }
 
@@ -147,24 +149,42 @@ fun TemperatureUnitDropdown(selectedUnit: String, onUnitSelected: (String) -> Un
 
 @Composable
 fun WindSpeedUnitDropdown(selectedUnit: String, onUnitSelected: (String) -> Unit) {
-    val windUnits = listOf("meter/sec", "miles/hour")
+    val meterPerSec = stringResource(R.string.meter_sec)
+    val milesPerHour = stringResource(R.string.miles_hour)
+
+    val displayToApiMap = mapOf(
+        meterPerSec to "meter/sec",
+        milesPerHour to "miles/hour"
+    )
+
+    val apiToDisplayMap = mapOf(
+        "meter/sec" to meterPerSec,
+        "miles/hour" to milesPerHour
+    )
 
     var expanded by remember { mutableStateOf(false) }
 
     Box(modifier = Modifier
         .fillMaxWidth()
         .clickable { expanded = true }) {
-        Text(text = selectedUnit, modifier = Modifier.padding(12.dp))
+        Text(
+            text = apiToDisplayMap[selectedUnit] ?: meterPerSec,
+            modifier = Modifier.padding(12.dp)
+        )
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            windUnits.forEach { unit ->
-                DropdownMenuItem(text = { Text(unit) }, onClick = {
-                    onUnitSelected(unit)
-                    expanded = false
-                })
+            displayToApiMap.forEach { (display, apiValue) ->
+                DropdownMenuItem(
+                    text = { Text(display) },
+                    onClick = {
+                        onUnitSelected(apiValue)
+                        expanded = false
+                    }
+                )
             }
         }
     }
 }
+
 
 
 
@@ -173,7 +193,7 @@ fun LanguageDropdown(
     selectedLanguage: String,
     onLanguageSelected: (String) -> Unit
 ) {
-    val languages = listOf("English" to "en", "Arabic" to "ar")
+    val languages = listOf(stringResource(R.string.english) to "en", stringResource(R.string.arabic) to "ar")
     var expanded by remember { mutableStateOf(false) }
 
     // Find display name from the stored value

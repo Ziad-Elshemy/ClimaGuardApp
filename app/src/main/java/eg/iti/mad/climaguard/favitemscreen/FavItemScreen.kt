@@ -40,6 +40,12 @@ fun FavItemScreen(viewModel: HomeViewModel, location: Location) {
         "standard" -> stringResource(R.string.k)
         else -> ""
     }
+    val windUnitSymbol = when (tempUnit) {
+        "metric" -> stringResource(R.string.meter_sec)
+        "imperial" -> stringResource(R.string.miles_hour)
+        "standard" -> stringResource(R.string.meter_sec)
+        else -> ""
+    }
     var responseForecast:ForecastResponse? = null
     when(uiForecastState){
         is Response.Loading -> {
@@ -59,7 +65,8 @@ fun FavItemScreen(viewModel: HomeViewModel, location: Location) {
                         responseForecast = responseForecast,
                         hourlyList = hourlyList,
                         daysList = daysList,
-                        tempUnitSymbol
+                        tempUnitSymbol = tempUnitSymbol,
+                        windUnitSymbol = windUnitSymbol
                     )
                 }
 

@@ -43,6 +43,16 @@
     <string name="c">°س</string>
     <string name="f">°ف</string>
     <string name="k">ك</string>
+    <string name="hpa">هكتوباسكال</string>
+    <string name="km">كم</string>
+    <string name="meter_sec">متر/ثانية</string>
+    <string name="miles_hour">ميل/ساعة</string>
+    <string name="m">متر</string>
+    <string name="english">English</string>
+    <string name="arabic">العربية</string>
+    <string name="kelvin">كيلفن</string>
+    <string name="celsius">سليزس</string>
+    <string name="fahrenheit">فهرنهايت</string>
 
 
 </resources>

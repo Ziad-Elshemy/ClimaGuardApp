@@ -72,7 +72,8 @@ fun WeatherScreenUi(
     responseForecast : ForecastResponse?,
     hourlyList :List<ListItem?>?,
     daysList :List<ListItem?>?,
-    tempUnitSymbol: String
+    tempUnitSymbol: String,
+    windUnitSymbol: String
 ){
     val language = Locale.getDefault().language
     Column(
@@ -317,7 +318,7 @@ fun WeatherScreenUi(
             CircularCard(
                 value = responseData.main?.pressure.toString(),
                 title = stringResource(R.string.pressure),
-                unit = "hpa",
+                unit = stringResource(R.string.hpa),
                 icon = ImageVector.vectorResource(id = R.drawable.ic_pressure),
                 language = language
             )
@@ -325,7 +326,7 @@ fun WeatherScreenUi(
             CircularCard(
                 value = responseData.wind?.speed.toString(),
                 title = stringResource(R.string.wind_speed),
-                unit = "meter/sec",
+                unit = windUnitSymbol,
                 icon = ImageVector.vectorResource(id = R.drawable.ic_wind),
                 language = language
             )
@@ -342,7 +343,7 @@ fun WeatherScreenUi(
             CircularCard(
                 value = visibility.toString(),
                 title = stringResource(R.string.visibility),
-                unit = "KM",
+                unit = stringResource(R.string.km),
                 icon = ImageVector.vectorResource(id = R.drawable.ic_visibility),
                 language = language
             )
@@ -352,7 +353,7 @@ fun WeatherScreenUi(
             CircularCard(
                 value = altitude.toString(),
                 title = stringResource(R.string.alt),
-                unit = "m",
+                unit = stringResource(R.string.m),
                 icon = ImageVector.vectorResource(id = R.drawable.ic_altitude),
                 language = language
             )
