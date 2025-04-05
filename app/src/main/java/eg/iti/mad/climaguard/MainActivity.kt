@@ -30,6 +30,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
@@ -73,6 +74,7 @@ import eg.iti.mad.climaguard.settings.SettingsFactory
 import eg.iti.mad.climaguard.settings.SettingsScreen
 import eg.iti.mad.climaguard.settings.SettingsViewModel
 import eg.iti.mad.climaguard.ui.theme.ClimaGuardTheme
+import eg.iti.mad.climaguard.utils.LocationPreferences
 import eg.iti.mad.climaguard.utils.Utility.Companion.setAppLocale
 import eg.iti.mad.climaguard.worker.SoundService
 import kotlinx.coroutines.CoroutineScope
@@ -92,10 +94,12 @@ class MainActivity : ComponentActivity() {
     lateinit var geocoder : Geocoder
     lateinit var settingsDataStore: SettingsDataStore
     lateinit var repo :Repository
+    lateinit var locationPrefs: LocationPreferences
 
     private val _locationState = MutableStateFlow(Location(LocationManager.GPS_PROVIDER))
     val locationState: StateFlow<Location> = _locationState.asStateFlow()
 
+    var isGpsEnabled by mutableStateOf(true)
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -104,6 +108,7 @@ class MainActivity : ComponentActivity() {
 
         geocoder = Geocoder(this)
         settingsDataStore = SettingsDataStore(this)
+        locationPrefs = LocationPreferences(this)
 
         lifecycleScope.launch {
             val language = settingsDataStore.language.first()
@@ -167,6 +172,12 @@ class MainActivity : ComponentActivity() {
 
             val navController = rememberNavController()
 
+            LaunchedEffect(Unit) {
+                settingsDataStore.gpsEnabled.collect {
+                    isGpsEnabled = it
+                }
+            }
+
             val targetScreen = intent?.getStringExtra("TARGET_SCREEN")
             val notificationId = intent?.getIntExtra("NOTIFICATION_ID", -1)
             val dateTime = intent?.getLongExtra("DATE_TIME", -1)
@@ -211,7 +222,16 @@ class MainActivity : ComponentActivity() {
                         bottomBar = { BottomNavigationBar(navController) }
                     ) { innerPadding ->
 
-                        val currentLocation by locationState.collectAsState()
+                        val gpsLocation = locationState.collectAsState().value
+                        val currentLocation: Location = if (isGpsEnabled) {
+                            gpsLocation
+                        } else {
+                            Location("").apply {
+                                latitude = locationPrefs.getLocation().first
+                                longitude = locationPrefs.getLocation().second
+                            }
+                        }
+
                         val graph =
                             navController.createGraph(startDestination = NavigationRoute.Home.route) {
                                 composable(route = NavigationRoute.Maps.route) { backStackEntry ->

@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import eg.iti.mad.climaguard.R
+import eg.iti.mad.climaguard.navigation.NavigationRoute
 
 @Composable
 fun SettingsScreen(navController: NavController, viewModel: SettingsViewModel) {
@@ -55,15 +56,21 @@ fun SettingsScreen(navController: NavController, viewModel: SettingsViewModel) {
             // Location Selection
             SectionTitle(stringResource(R.string.location), Icons.Default.LocationOn)
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+
                 RadioButton(
                     selected = isGpsEnabled,
                     onClick = { viewModel.saveSettings(true, selectedTemperatureUnit, selectedWindSpeedUnit, selectedLanguage) }
                 )
                 Text(text = stringResource(R.string.use_gps), modifier = Modifier.padding(start = 8.dp))
+
                 Spacer(modifier = Modifier.weight(1f))
+
                 RadioButton(
                     selected = !isGpsEnabled,
-                    onClick = { viewModel.saveSettings(false, selectedTemperatureUnit, selectedWindSpeedUnit, selectedLanguage) }
+                    onClick = {
+                        viewModel.saveSettings(false, selectedTemperatureUnit, selectedWindSpeedUnit, selectedLanguage)
+                        navController.navigate(NavigationRoute.Maps.createRoute("settings")) // show map screen
+                    }
                 )
                 Text(text = stringResource(R.string.pick_from_map), modifier = Modifier.padding(start = 8.dp))
             }

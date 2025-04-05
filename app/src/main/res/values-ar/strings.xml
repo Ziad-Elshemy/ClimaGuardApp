@@ -53,6 +53,7 @@
     <string name="kelvin">كيلفن</string>
     <string name="celsius">سليزس</string>
     <string name="fahrenheit">فهرنهايت</string>
+    <string name="save_location">حفظ الموقع</string>
 
 
 </resources>
