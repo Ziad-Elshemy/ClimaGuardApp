@@ -153,7 +153,7 @@ fun MapScreen(viewModel: MapViewModel,
                                 Spacer(modifier = Modifier.width(8.dp))
 
                                 Text(
-                                    text = suggestion.name,
+                                    text = "${suggestion.name}, ${suggestion.country}",
                                     style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp),
                                     modifier = Modifier.weight(1f)
                                 )
