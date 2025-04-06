@@ -76,12 +76,6 @@ class Utility {
             return (44330 * (1 - Math.pow(groundPressure / seaLevelPressure, 0.1903))).toInt()
         }
 
-//        fun convertToArabicNumbers(number: Double): String {
-//            val locale = Locale("ar", "SA")
-//            val symbols = DecimalFormatSymbols(locale)
-//            val df = DecimalFormat("#,###", symbols)
-//            return df.format(number)
-//        }
 
         fun convertToArabicNumbers(input: String): String {
             val arabicDigits = arrayOf('٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩')

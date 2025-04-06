@@ -112,7 +112,7 @@ class MainActivity : ComponentActivity() {
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
-        val splashScreen = installSplashScreen()
+//        val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
@@ -171,15 +171,15 @@ class MainActivity : ComponentActivity() {
 
 
 
-        splashScreen.setKeepOnScreenCondition {
-            // false to hide
-            false
-        }
-
-        splashScreen.setOnExitAnimationListener { splashView ->
-            // do animation here
-            splashView.remove()
-        }
+//        splashScreen.setKeepOnScreenCondition {
+//            // false to hide
+//            false
+//        }
+//
+//        splashScreen.setOnExitAnimationListener { splashView ->
+//            // do animation here
+//            splashView.remove()
+//        }
 
         setContent {
 
