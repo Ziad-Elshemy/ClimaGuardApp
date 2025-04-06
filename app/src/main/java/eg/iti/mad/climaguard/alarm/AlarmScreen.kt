@@ -83,6 +83,7 @@ import eg.iti.mad.climaguard.model.AlarmEntity
 import eg.iti.mad.climaguard.model.LocationEntity
 import eg.iti.mad.climaguard.model.Response
 import eg.iti.mad.climaguard.navigation.NavigationRoute
+import eg.iti.mad.climaguard.utils.Utility
 import eg.iti.mad.climaguard.worker.AlarmWorker
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -261,9 +262,21 @@ fun AlarmItem(alarm: AlarmEntity,navController: NavController,
 
                 Spacer(modifier = Modifier.height(4.dp))
 
-                // Location Name
+                // Alarm Type
                 Text(
                     text = alarm.type,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = Color.Gray
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Alarm Type
+                val (date, time) = Utility.formatTimestamp(alarm.dateTime ?: 0)
+                Log.d("AlarmItem", "dateTime: ${alarm.dateTime} date: ${date} time: ${time}  ")
+                Text(
+                    text = "$date $time",
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Medium,
                     color = Color.Gray
